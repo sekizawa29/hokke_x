@@ -1,0 +1,8 @@
+{
+  "name": "猫写真テンプレート1",
+  "category": "cat_photo",
+  "template": "本日の業務報告",
+  "hashtags": [],
+  "image_style": "nano_banana",
+  "requires_real_photo": true
+}
