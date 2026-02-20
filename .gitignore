@@ -3,3 +3,9 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+post_scheduler/auto_post_state.json
+post_scheduler/auto_post.log
+reply_system/reply_cron.log
+analytics/x_api_usage.jsonl
+hook_performance.json
+reply_system/memory/

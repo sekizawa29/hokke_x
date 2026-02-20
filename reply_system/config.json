@@ -1,14 +1,53 @@
 {
-  "daily_reply_limit": 10,
-  "reply_interval_seconds": 180,
+  "daily_reply_limit": 15,
+  "session_reply_limit": 5,
+  "reply_interval_seconds": 300,
   "max_replies_per_account_per_day": 1,
   "search_tweets_per_query": 10,
-  "search_queries_per_run": 2,
+  "search_queries_per_run": 3,
   "enabled": true,
+  "min_followers_to_target": 50,
+  "max_followers_to_target": 50000,
+  "max_consecutive_skips": 5,
+  "max_consecutive_failures": 3,
+  "active_hours_jst": {
+    "start": 7,
+    "end": 23
+  },
   "search_keywords": {
-    "猫系": ["猫 かわいい", "猫 写真", "にゃんこ", "猫と暮らす"],
-    "脱力系": ["何もしたくない", "布団から出たくない", "やる気でない", "だるい"],
-    "メンタル系": ["疲れた", "しんどい", "休みたい", "もう無理"],
-    "テック系": ["エンジニア 疲れた", "コード 動かない", "デプロイ 失敗"]
+    "猫系": [
+      "猫 かわいい",
+      "猫 写真",
+      "にゃんこ",
+      "猫と暮らす",
+      "猫好き",
+      "うちの猫"
+    ],
+    "脱力系": [
+      "何もしたくない",
+      "布団から出たくない",
+      "やる気でない",
+      "だるい",
+      "のんびりしたい",
+      "ぼーっとしてた"
+    ],
+    "メンタル系": [
+      "疲れた",
+      "休みたい",
+      "ため息"
+    ],
+    "テック系": [
+      "エンジニア 疲れた",
+      "コード 動かない",
+      "デプロイ 失敗",
+      "プログラミング つらい",
+      "在宅ワーク 孤独"
+    ],
+    "鋭い一言系": [
+      "人間って不思議",
+      "なんで忙しいふりするんだろう",
+      "SNS 疲れる",
+      "比べても意味ない"
+    ]
   }
 }

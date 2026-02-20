@@ -12,11 +12,17 @@ import time
 import random
 import argparse
 import requests
+import subprocess
+import re
+import shutil
 from pathlib import Path
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from typing import Optional
 
 from dotenv import load_dotenv
+
+# 即時フラッシュ設定（長時間実行時の進捗表示のため）
+sys.stdout.reconfigure(line_buffering=True)
 
 # パス設定
 SCRIPT_DIR = Path(__file__).parent
@@ -33,6 +39,7 @@ load_dotenv(ENV_FILE)
 # x_poster を import
 sys.path.insert(0, str(PROJECT_DIR / "post_scheduler"))
 from x_poster import XPoster
+from x_api_client import XApiClient
 
 
 def load_json(path: Path) -> any:
@@ -60,6 +67,7 @@ class ReplyEngine:
             raise ValueError("X_BEARER_TOKEN が未設定")
 
         self.poster = XPoster()
+        self.x_api = XApiClient(require_bearer=True)
 
     def _load_persona(self) -> str:
         if PERSONA_FILE.exists():
@@ -73,21 +81,9 @@ class ReplyEngine:
 
     def search_tweets(self, query: str, max_results: int = 10) -> list:
         """X API v2でツイートを検索"""
-        url = "https://api.x.com/2/tweets/search/recent"
-        headers = {"Authorization": f"Bearer {self.bearer_token}"}
-        params = {
-            "query": f"{query} -is:retweet -is:reply lang:ja",
-            "max_results": min(max_results, 100),
-            "tweet.fields": "author_id,created_at,public_metrics",
-            "expansions": "author_id",
-            "user.fields": "username,public_metrics"
-        }
-
         try:
-            resp = requests.get(url, headers=headers, params=params)
-            resp.raise_for_status()
-            return resp.json()
-        except requests.RequestException as e:
+            return self.x_api.search_recent_tweets(query, max_results=max_results)
+        except Exception as e:
             print(f"検索エラー ({query}): {e}")
             return {}
 
@@ -135,11 +131,13 @@ class ReplyEngine:
             for u in result.get('includes', {}).get('users', []):
                 users[u['id']] = u
 
+            min_followers = self.config.get('min_followers_to_target', 0)
             for tweet in result.get('data', []):
                 author_id = tweet['author_id']
                 user = users.get(author_id, {})
                 username = user.get('username', '')
-                if username and username != 'cat_hokke':
+                followers = user.get('public_metrics', {}).get('followers_count', 0)
+                if username and username != 'cat_hokke' and followers >= min_followers:
                     self.add_target(username, author_id, category)
                     added += 1
 
@@ -172,20 +170,22 @@ class ReplyEngine:
             for r in self.log
         )
 
+    def _within_active_hours(self) -> bool:
+        """JSTベースの稼働時間判定"""
+        active = self.config.get("active_hours_jst", {})
+        start = int(active.get("start", 0))
+        end = int(active.get("end", 23))
+        jst = timezone(timedelta(hours=9))
+        now_hour = datetime.now(jst).hour
+        if start <= end:
+            return start <= now_hour <= end
+        # e.g. start=22, end=5 (overnight)
+        return now_hour >= start or now_hour <= end
+
     def get_best_tweet(self, user_id: str) -> Optional[dict]:
         """ユーザーのツイートをエンゲージメントスコアで選定"""
-        url = f"https://api.x.com/2/users/{user_id}/tweets"
-        headers = {"Authorization": f"Bearer {self.bearer_token}"}
-        params = {
-            "max_results": 10,
-            "tweet.fields": "created_at,public_metrics",
-            "exclude": "retweets,replies"
-        }
-
         try:
-            resp = requests.get(url, headers=headers, params=params)
-            resp.raise_for_status()
-            data = resp.json().get('data', [])
+            data = self.x_api.get_user_tweets(user_id, max_results=10)
             if not data:
                 return None
 
@@ -205,8 +205,113 @@ class ReplyEngine:
             print(f"ツイート取得エラー ({user_id}): {e}")
         return None
 
+    def _call_claude(self, system_prompt: str, user_prompt: str, timeout: int = 45) -> Optional[str]:
+        """Claude CLI共通呼び出し"""
+        prompt = f"""# System
+{system_prompt}
+
+# User
+{user_prompt}
+"""
+        # Prefer PATH lookup for portability; fallback to known local path.
+        claude_cmd = shutil.which("claude")
+        if not claude_cmd:
+            fallback = "/home/sekiz/.nvm/versions/node/v24.13.0/bin/claude"
+            if Path(fallback).exists():
+                claude_cmd = fallback
+            else:
+                print("  claude コマンドが見つからない")
+                return None
+
+        try:
+            result = subprocess.run(
+                [claude_cmd, "-p", prompt],
+                capture_output=True,
+                text=True,
+                timeout=timeout,
+            )
+        except subprocess.TimeoutExpired:
+            print("  Claude呼び出しタイムアウト")
+            return None
+        except FileNotFoundError:
+            print("  claude コマンドが見つからない")
+            return None
+
+        if result.returncode != 0:
+            err = (result.stderr or "").strip()
+            print(f"  Claude実行エラー (exit={result.returncode}): {err[:200]}")
+            return None
+        return (result.stdout or "").strip()
+
+    def _extract_reply_text(self, raw: str) -> str:
+        """Model output sanitization for reply body."""
+        text = (raw or "").strip()
+        if not text:
+            return ""
+
+        # Remove fenced blocks if present.
+        text = re.sub(r"^```[a-zA-Z]*\n", "", text)
+        text = re.sub(r"\n```$", "", text)
+
+        # Drop common leading labels.
+        text = re.sub(r"^(リプライ|返信|Reply)\s*[:：]\s*", "", text)
+
+        # Use first meaningful line to avoid explanatory tails.
+        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+        if lines:
+            text = lines[0]
+
+        # Trim enclosing quotes
+        text = text.strip().strip('"').strip("「").strip("」")
+        return text.strip()
+
+    def judge_tweet(self, tweet_text: str) -> Optional[str]:
+        """Step 1: ツイートにリプすべきか判断（低temperature）
+
+        Returns:
+            None: リプOK
+            str: スキップ理由
+        """
+        system_prompt = """あなたはSNS投稿の安全性を判断するモデレーターです。
+以下のツイートに、猫キャラクターのアカウントがリプライしても問題ないか判断してください。
+
+## スキップすべきケース
+- 訃報・お悔やみ・死亡に関する内容
+- 深刻な病気・入院・事故の報告
+- 炎上中・論争中の話題
+- 政治的・宗教的に繊細な内容
+- 明らかな宣伝・スパム・勧誘
+- 内容が薄すぎてリプしようがない（「あ」「。」だけ等）
+- 文脈がわからない（他ツイートへの返信や内輪ネタ等）
+- 怒りや悲しみが強すぎて猫がリプすると不謹慎になりそうな内容
+- 下ネタ・性的な含意があるツイート（隠語・スラング・ダブルミーニング含む）
+- 誤読リスクが高いツイート（字面と真意が異なる可能性がある）
+
+## 出力形式（厳守）
+JSON形式で出力。他の文字は一切含めないこと。
+リプOK: {"ok": true}
+スキップ: {"ok": false, "reason": "簡潔な理由"}"""
+
+        user_prompt = f"このツイートを判断してください:\n\n{tweet_text}"
+
+        raw = self._call_claude(system_prompt, user_prompt, timeout=45)
+        if not raw:
+            return "LLM呼び出し失敗"
+
+        try:
+            # Claude出力に説明が混ざる場合に備えてJSONを抽出
+            m = re.search(r"\{.*?\}", raw, re.DOTALL)
+            payload = m.group(0) if m else raw
+            result = json_module.loads(payload)
+            if result.get("ok"):
+                return None  # リプOK
+            return result.get("reason", "不明な理由でスキップ")
+        except (json_module.JSONDecodeError, TypeError):
+            print(f"  判断JSONパース失敗: {raw}")
+            return "判断レスポンス不正"
+
     def generate_reply(self, tweet_text: str, category: str) -> Optional[str]:
-        """DeepSeek APIでリプライすべきか判断し、リプライを生成（1回のAPI呼び出し）
+        """Step 1で判断 → Step 2でリプ生成の2段階
 
         Returns:
             str: リプライ本文
@@ -215,11 +320,14 @@ class ReplyEngine:
         """
         self._last_skip_reason = None
 
-        api_key = os.getenv('DEEPSEEK_API_KEY', '')
-        if not api_key:
-            print("  DEEPSEEK_API_KEY が未設定")
+        # --- Step 1: 判断 ---
+        skip_reason = self.judge_tweet(tweet_text)
+        if skip_reason:
+            print(f"  LLM判断: スキップ ({skip_reason})")
+            self._last_skip_reason = skip_reason
             return None
 
+        # --- Step 2: リプ生成 ---
         system_prompt = """あなたは「ホッケ」というキャラクターです。以下のペルソナに厳密に従ってリプライを生成してください。
 
 ## ペルソナ要約
@@ -230,85 +338,33 @@ class ReplyEngine:
 - 絶対やらないこと: 意識高い発言、説教、自己啓発、過度な共感（「わかるー！」）、媚び、絵文字の乱用
 - 優しいけど甘くない。慰めない。でも否定もしない。
 
-## 判断ルール（最重要）
-まずこのツイートにリプライすべきか判断してください。
-以下に該当する場合はリプライしないでください:
-- 訃報・お悔やみ・死亡に関する内容
-- 深刻な病気・入院・事故の報告
-- 炎上中・論争中の話題
-- 政治的・宗教的に繊細な内容
-- 明らかな宣伝・スパム・勧誘
-- 内容が薄すぎてリプしようがない（「あ」「。」だけ等）
-- 文脈がわからない（他ツイートへの返信や内輪ネタ等）
-- 怒りや悲しみが強すぎて猫がリプすると不謹慎になりそうな内容
-
 ## リプライのルール
 - 1〜2文で短く返す（最大80文字程度）
 - 「すごい」「いいね」「わかる」だけの薄いリプはしない
 - 相手のツイート内容に対してホッケらしい視点でコメントする
 - 猫の視点から人間を観察するような一言が理想
 - 攻撃的にならない。でも媚びない。
+- リプライ本文のみを出力。説明や前置きは不要。"""
 
-## 出力形式（厳守）
-JSON形式で出力。他の文字は一切含めないこと。
-リプする場合: {"reply": "リプ本文"}
-しない場合: {"skip": "簡潔な理由"}"""
+        user_prompt = f"以下のツイートにホッケとしてリプライしてください。\n\nツイート: {tweet_text}"
 
-        user_prompt = f"以下のツイートを判断し、適切ならホッケとしてリプライしてください。\n\nツイート: {tweet_text}"
+        reply_raw = self._call_claude(system_prompt, user_prompt, timeout=60)
+        reply = self._extract_reply_text(reply_raw or "")
+        if not reply:
+            return None
 
-        try:
-            resp = requests.post(
-                "https://api.deepseek.com/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {api_key}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "deepseek-chat",
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "max_tokens": 200,
-                    "temperature": 0.8
-                }
-            )
-            resp.raise_for_status()
-            reply_raw = resp.json()['choices'][0]['message']['content'].strip()
+        # 長すぎるリプは切る
+        if len(reply) > 140:
+            reply = reply[:140]
 
-            # JSONパース
-            try:
-                result = json_module.loads(reply_raw)
-                if "skip" in result:
-                    reason = result['skip']
-                    print(f"  LLM判断: スキップ ({reason})")
-                    self._last_skip_reason = reason
-                    return None
-                reply = result.get("reply", "")
-            except (json_module.JSONDecodeError, TypeError):
-                # JSONパース失敗時はテキストをそのままリプとして扱う（従来互換）
-                print(f"  JSONパース失敗、テキストをそのまま使用")
-                reply = reply_raw
-
-            if not reply:
+        # 基本的なセルフチェック
+        ng_phrases = ['頑張', '応援', '素敵', 'ありがとう', '！！', '😊', '💪', '✨']
+        for phrase in ng_phrases:
+            if phrase in reply:
+                print(f"  セルフチェックNG: '{phrase}' を含む")
                 return None
 
-            # 長すぎるリプは切る
-            if len(reply) > 140:
-                reply = reply[:140]
-
-            # 基本的なセルフチェック
-            ng_phrases = ['頑張', '応援', '素敵', 'ありがとう', '！！', '😊', '💪', '✨']
-            for phrase in ng_phrases:
-                if phrase in reply:
-                    print(f"  セルフチェックNG: '{phrase}' を含む")
-                    return None
-
-            return reply
-
-        except requests.RequestException as e:
-            print(f"  リプ生成エラー: {e}")
-            return None
+        return reply
 
     def execute_replies(self, dry_run: bool = False) -> dict:
         """リプライを実行"""
@@ -316,107 +372,160 @@ JSON形式で出力。他の文字は一切含めないこと。
             print("リプライエンジンは無効です")
             return {"posted": 0, "skipped": 0}
 
+        if not self._within_active_hours():
+            print("稼働時間外のためスキップ")
+            return {"posted": 0, "skipped": 0}
+
         daily_limit = self.config.get('daily_reply_limit', 10)
+        session_limit = self.config.get('session_reply_limit', daily_limit)
         interval = self.config.get('reply_interval_seconds', 180)
+        per_query = self.config.get('search_tweets_per_query', 10)
+        max_queries = self.config.get('search_queries_per_run', 2)
+        min_followers = self.config.get('min_followers_to_target', 0)
+        max_followers = self.config.get('max_followers_to_target', 999999999)
+        max_consecutive_skips = self.config.get('max_consecutive_skips', 5)
+        max_consecutive_failures = self.config.get('max_consecutive_failures', 3)
+
         today_count = self._today_reply_count()
 
         if today_count >= daily_limit:
             print(f"今日の上限に到達済み ({today_count}/{daily_limit})")
             return {"posted": 0, "skipped": 0}
 
-        remaining = daily_limit - today_count
-        candidates = [
-            t for t in self.targets
-            if not self._replied_today(t['username'])
-        ]
-        random.shuffle(candidates)
-        candidates = candidates[:remaining]
+        remaining_today = daily_limit - today_count
+        remaining = min(session_limit, remaining_today)
+        if remaining <= 0:
+            print("このセッションの残り投稿枠なし")
+            return {"posted": 0, "skipped": 0}
+
+        keywords = self.config.get('search_keywords', {})
+        query_pool = []
+        for category, kws in keywords.items():
+            for kw in kws:
+                query_pool.append((category, kw))
+        random.shuffle(query_pool)
+        queries_to_run = query_pool[:max_queries]
 
         posted = 0
         skipped = 0
+        seen_tweet_ids: set[str] = set()
+        session_replied_users: set[str] = set()
+        consecutive_skips = 0
+        consecutive_failures = 0
 
-        for target in candidates:
-            username = target['username']
-            user_id = target['user_id']
-            print(f"\n処理中: @{username}")
+        print(f"\n--- 開始: {len(queries_to_run)}クエリから最大{remaining}件を処理します ---")
 
-            # エンゲージメント上位ツイート取得
-            tweet = self.get_best_tweet(user_id)
-            if not tweet:
-                print(f"  ツイート取得できず。スキップ")
-                skipped += 1
-                continue
+        for qi, (category, query) in enumerate(queries_to_run):
+            if posted >= remaining:
+                break
+            print(f"\n[query {qi+1}/{len(queries_to_run)}] 検索中: '{query}' ({category})")
+            result = self.search_tweets(query, per_query)
+            tweets = result.get("data", [])
+            users = {u["id"]: u for u in result.get("includes", {}).get("users", [])}
 
-            tweet_text = tweet.get('text', '')
-            tweet_id = tweet.get('id', '')
+            for tweet in tweets:
+                if posted >= remaining:
+                    break
 
-            # NGチェック
-            if self.is_ng(tweet_text):
-                print(f"  NGキーワード検出。スキップ")
-                skipped += 1
-                continue
+                tweet_id = str(tweet.get("id", ""))
+                tweet_text = tweet.get("text", "")
+                author_id = tweet.get("author_id", "")
+                user = users.get(author_id, {})
+                username = user.get("username", "")
+                followers = user.get("public_metrics", {}).get("followers_count", 0)
 
-            # LLM判断 + リプ生成
-            reply_text = self.generate_reply(tweet_text, target['category'])
-            if not reply_text:
-                # LLMスキップの場合はログに記録
-                if self._last_skip_reason:
-                    print(f"  LLMスキップ。理由: {self._last_skip_reason}")
-                    self.log.append({
-                        "date": date.today().isoformat(),
-                        "timestamp": datetime.now().isoformat(),
-                        "target_user": username,
-                        "target_tweet_id": tweet_id,
-                        "target_tweet_text": tweet_text[:200],
-                        "reply_text": None,
-                        "category": target['category'],
-                        "status": "llm_skip",
-                        "skip_reason": self._last_skip_reason
-                    })
-                    save_json(LOG_FILE, self.log)
-                else:
-                    print(f"  リプ生成失敗。スキップ")
-                skipped += 1
-                continue
+                if not tweet_id or tweet_id in seen_tweet_ids:
+                    continue
+                seen_tweet_ids.add(tweet_id)
 
-            # 投稿
-            if dry_run:
-                print(f"  [DRY RUN] @{username} へ: {reply_text}")
-                status = "dry_run"
-            else:
-                result = self.poster.post_reply(reply_text, tweet_id)
-                status = "posted" if result.get('success') else "failed"
-                if not result.get('success'):
-                    print(f"  投稿失敗: {result.get('error')}")
+                if not username or username == "cat_hokke":
                     skipped += 1
                     continue
+                if followers < min_followers or followers > max_followers:
+                    skipped += 1
+                    continue
+                if self._replied_today(username) or username in session_replied_users:
+                    skipped += 1
+                    continue
+                if self.is_ng(tweet_text):
+                    skipped += 1
+                    consecutive_skips += 1
+                    if consecutive_skips >= max_consecutive_skips:
+                        print(f"連続スキップ上限に到達 ({consecutive_skips})。セッション終了")
+                        return {"posted": posted, "skipped": skipped}
+                    continue
 
-            # ログ記録
-            self.log.append({
-                "date": date.today().isoformat(),
-                "timestamp": datetime.now().isoformat(),
-                "target_user": username,
-                "target_tweet_id": tweet_id,
-                "target_tweet_text": tweet_text[:200],
-                "reply_text": reply_text,
-                "category": target['category'],
-                "status": status
-            })
-            save_json(LOG_FILE, self.log)
+                reply_text = self.generate_reply(tweet_text, category)
+                if not reply_text:
+                    if self._last_skip_reason:
+                        print(f"  LLMスキップ。理由: {self._last_skip_reason}")
+                        self.log.append({
+                            "date": date.today().isoformat(),
+                            "timestamp": datetime.now().isoformat(),
+                            "target_user": username,
+                            "target_tweet_id": tweet_id,
+                            "target_tweet_text": tweet_text[:200],
+                            "reply_text": None,
+                            "category": category,
+                            "status": "llm_skip",
+                            "skip_reason": self._last_skip_reason,
+                            "source_query": query
+                        })
+                        save_json(LOG_FILE, self.log)
+                    skipped += 1
+                    consecutive_skips += 1
+                    if consecutive_skips >= max_consecutive_skips:
+                        print(f"連続スキップ上限に到達 ({consecutive_skips})。セッション終了")
+                        return {"posted": posted, "skipped": skipped}
+                    continue
 
-            # ターゲット情報更新
-            target['reply_count'] = target.get('reply_count', 0) + 1
-            target['last_replied_at'] = datetime.now().isoformat()
-            save_json(TARGETS_FILE, self.targets)
+                # 投稿
+                if dry_run:
+                    print(f"  [DRY RUN] @{username} へ: {reply_text}")
+                    status = "dry_run"
+                else:
+                    post_result = self.poster.post_reply(reply_text, tweet_id)
+                    status = "posted" if post_result.get('success') else "failed"
+                    if not post_result.get('success'):
+                        print(f"  投稿失敗: {post_result.get('error')}")
+                        skipped += 1
+                        consecutive_failures += 1
+                        if consecutive_failures >= max_consecutive_failures:
+                            print(f"連続失敗上限に到達 ({consecutive_failures})。セッション終了")
+                            return {"posted": posted, "skipped": skipped}
+                        continue
 
-            posted += 1
-            print(f"  リプ完了: {reply_text[:50]}")
+                self.log.append({
+                    "date": date.today().isoformat(),
+                    "timestamp": datetime.now().isoformat(),
+                    "target_user": username,
+                    "target_tweet_id": tweet_id,
+                    "target_tweet_text": tweet_text[:200],
+                    "reply_text": reply_text,
+                    "category": category,
+                    "status": status,
+                    "source_query": query
+                })
+                save_json(LOG_FILE, self.log)
 
-            # 間隔を空ける
-            if posted < remaining and not dry_run:
-                wait = interval + random.randint(0, 60)
-                print(f"  {wait}秒待機...")
-                time.sleep(wait)
+                # ターゲット情報更新（既存ターゲットのみ）
+                for target in self.targets:
+                    if target.get("username") == username:
+                        target['reply_count'] = target.get('reply_count', 0) + 1
+                        target['last_replied_at'] = datetime.now().isoformat()
+                        save_json(TARGETS_FILE, self.targets)
+                        break
+
+                posted += 1
+                consecutive_skips = 0
+                consecutive_failures = 0
+                session_replied_users.add(username)
+                print(f"  リプ完了: @{username} / {reply_text[:50]}")
+
+                if posted < remaining and not dry_run:
+                    wait = interval + random.randint(0, 60)
+                    print(f"  {wait}秒待機...")
+                    time.sleep(wait)
 
         print(f"\n結果: {posted}件投稿, {skipped}件スキップ")
         return {"posted": posted, "skipped": skipped}

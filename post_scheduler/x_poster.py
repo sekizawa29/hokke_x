@@ -14,6 +14,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, List, Dict
 from dotenv import load_dotenv
+from x_api_client import XApiClient
 
 try:
     import tweepy
@@ -25,73 +26,115 @@ except ImportError:
 load_dotenv()
 
 SCRIPT_DIR = Path(__file__).parent
+PROJECT_DIR = SCRIPT_DIR.parent
+if str(PROJECT_DIR) not in sys.path:
+    sys.path.insert(0, str(PROJECT_DIR))
+from notifications.discord_notifier import DiscordNotifier
+
 QUEUE_FILE = SCRIPT_DIR / "post_queue.json"
 IMAGES_DIR = SCRIPT_DIR.parent / "scheduled_images"
+HOOK_PERF_FILE = SCRIPT_DIR.parent / "hook_performance.json"
 
 
 class XPoster:
     """X (Twitter) への投稿"""
 
     def __init__(self):
-        api_key = os.getenv('X_API_KEY')
-        api_secret = os.getenv('X_API_SECRET')
-        access_token = os.getenv('X_ACCESS_TOKEN')
-        access_token_secret = os.getenv('X_ACCESS_TOKEN_SECRET')
-
-        if not all([api_key, api_secret, access_token, access_token_secret]):
-            missing = []
-            if not api_key: missing.append('X_API_KEY')
-            if not api_secret: missing.append('X_API_SECRET')
-            if not access_token: missing.append('X_ACCESS_TOKEN')
-            if not access_token_secret: missing.append('X_ACCESS_TOKEN_SECRET')
-            raise ValueError(f"環境変数が未設定: {', '.join(missing)}")
-
-        self.auth = tweepy.OAuth1UserHandler(
-            api_key, api_secret, access_token, access_token_secret
-        )
-        self.api_v1 = tweepy.API(self.auth)
-        self.client = tweepy.Client(
-            consumer_key=api_key,
-            consumer_secret=api_secret,
-            access_token=access_token,
-            access_token_secret=access_token_secret
-        )
+        self.api_client = XApiClient(require_user_auth=True)
         print("X API認証成功")
 
     def verify_credentials(self) -> bool:
         try:
-            user = self.api_v1.verify_credentials()
+            user = self.api_client.verify_credentials()
             print(f"認証済み: @{user.screen_name}")
             return True
         except tweepy.TweepyException as e:
             print(f"認証エラー: {e}")
             return False
 
+    def _record_to_hook_performance(self, tweet_id: str, text: str, hook_category: str) -> None:
+        if HOOK_PERF_FILE.exists():
+            with open(HOOK_PERF_FILE, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+        else:
+            data = {"version": "1.0", "posts": []}
+
+        data["posts"].append({
+            "tweet_id": str(tweet_id),
+            "text": text,
+            "hookCategory": hook_category,
+            "postedAt": datetime.now().astimezone().strftime('%Y-%m-%dT%H:%M:%S'),
+            "engagementFetchedAt": None,
+            "likes": None, "retweets": None, "replies": None, "quotes": None,
+            "impressions": None, "url_link_clicks": None,
+            "user_profile_clicks": None, "bookmarks": None,
+            "diagnosis": None
+        })
+
+        with open(HOOK_PERF_FILE, 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=2)
+        print(f"[HookPerf] 記録完了: {hook_category} / tweet_id={tweet_id}")
+
     def _upload_media(self, image_path: str) -> int:
         path = Path(image_path)
         if not path.exists():
             raise FileNotFoundError(f"画像が見つからない: {image_path}")
-        media = self.api_v1.media_upload(filename=str(path))
+        media = self.api_client.media_upload(filename=str(path))
         return media.media_id
 
-    def post_text(self, text: str) -> dict:
+    def _notify_post_success(self, *, text: str, hook_category: str, url: str) -> None:
+        """Best-effort Discord notify for normal posts."""
         try:
-            response = self.client.create_tweet(text=text)
+            notifier = DiscordNotifier.from_env("DISCORD_WEBHOOK_POST")
+        except ValueError:
+            # Not configured: skip silently to avoid breaking posting flow.
+            return
+
+        short = text.strip().replace("\n", " ")
+        if len(short) > 120:
+            short = short[:119] + "…"
+
+        message = (
+            "🐾 **ホッケ 投稿通知**\n"
+            f"- category: `{hook_category}`\n"
+            f"- text: {short}\n"
+            f"- url: {url}"
+        )
+        res = notifier.send(message, username="Hokke Post Bot")
+        if not res.ok:
+            print(f"[notify] Discord送信失敗: {res.error}")
+
+    def post_text(self, text: str, hook_category: str = "未分類") -> dict:
+        try:
+            response = self.api_client.create_tweet(
+                text=text,
+                context="x_poster.post_text",
+                metadata={"hook_category": hook_category},
+            )
             tweet_id = response.data['id']
             url = f"https://x.com/i/web/status/{tweet_id}"
             print(f"投稿成功: {url}")
+            self._record_to_hook_performance(tweet_id, text, hook_category)
+            self._notify_post_success(text=text, hook_category=hook_category, url=url)
             return {'success': True, 'tweet_id': tweet_id, 'url': url}
         except tweepy.TweepyException as e:
             print(f"投稿エラー: {e}")
             return {'success': False, 'error': str(e)}
 
-    def post_with_image(self, text: str, image_path: str) -> dict:
+    def post_with_image(self, text: str, image_path: str, hook_category: str = "未分類") -> dict:
         try:
             media_id = self._upload_media(image_path)
-            response = self.client.create_tweet(text=text, media_ids=[media_id])
+            response = self.api_client.create_tweet(
+                text=text,
+                media_ids=[media_id],
+                context="x_poster.post_with_image",
+                metadata={"hook_category": hook_category},
+            )
             tweet_id = response.data['id']
             url = f"https://x.com/i/web/status/{tweet_id}"
             print(f"画像付き投稿成功: {url}")
+            self._record_to_hook_performance(tweet_id, text, hook_category)
+            self._notify_post_success(text=text, hook_category=hook_category, url=url)
             return {'success': True, 'tweet_id': tweet_id, 'url': url}
         except (FileNotFoundError, tweepy.TweepyException) as e:
             print(f"投稿エラー: {e}")
@@ -102,8 +145,11 @@ class XPoster:
             media_ids = None
             if image_path:
                 media_ids = [self._upload_media(image_path)]
-            response = self.client.create_tweet(
-                text=text, in_reply_to_tweet_id=reply_to_tweet_id, media_ids=media_ids
+            response = self.api_client.create_tweet(
+                text=text,
+                in_reply_to_tweet_id=reply_to_tweet_id,
+                media_ids=media_ids,
+                context="x_poster.post_reply",
             )
             tweet_id = response.data['id']
             url = f"https://x.com/i/web/status/{tweet_id}"
@@ -200,6 +246,8 @@ def main():
     parser.add_argument('--reply-to', '-r', type=str, help='リプライ先ツイートID')
     parser.add_argument('--thread', type=str, help='スレッド用JSONファイル')
     parser.add_argument('--schedule', '-s', type=str, help='予約日時 (YYYY-MM-DD HH:MM)')
+    parser.add_argument('--hook-category', '-c', type=str, default='未分類',
+        help='投稿カテゴリ（脱力系/猫写真/鋭い一言/日常観察/時事ネタ/たまに有益）')
 
     args = parser.parse_args()
 
@@ -231,9 +279,9 @@ def main():
     elif args.reply_to:
         poster.post_reply(args.text, args.reply_to, args.image)
     elif args.image:
-        poster.post_with_image(args.text, args.image)
+        poster.post_with_image(args.text, args.image, args.hook_category)
     else:
-        poster.post_text(args.text)
+        poster.post_text(args.text, args.hook_category)
 
 
 if __name__ == "__main__":

@@ -16,28 +16,13 @@ except ImportError:
     exit(1)
 
 load_dotenv()
+from x_api_client import XApiClient
 
 class TrendWatcher:
     """Xのトレンドを監視する"""
 
     def __init__(self):
-        api_key = os.getenv('X_API_KEY')
-        api_secret = os.getenv('X_API_SECRET')
-        access_token = os.getenv('X_ACCESS_TOKEN')
-        access_token_secret = os.getenv('X_ACCESS_TOKEN_SECRET')
-
-        if not all([api_key, api_secret, access_token, access_token_secret]):
-            missing = []
-            if not api_key: missing.append('X_API_KEY')
-            if not api_secret: missing.append('X_API_SECRET')
-            if not access_token: missing.append('X_ACCESS_TOKEN')
-            if not access_token_secret: missing.append('X_ACCESS_TOKEN_SECRET')
-            raise ValueError(f"環境変数が未設定: {', '.join(missing)}")
-
-        auth = tweepy.OAuth1UserHandler(
-            api_key, api_secret, access_token, access_token_secret
-        )
-        self.api = tweepy.API(auth)
+        self.api_client = XApiClient(require_user_auth=True)
         print("X API v1.1 認証成功（OAuth 1.0a）")
 
     def get_trends(self, woeid: int = 23424856) -> List[Dict]:
@@ -51,7 +36,7 @@ class TrendWatcher:
             トレンドのリスト
         """
         try:
-            trends = self.api.get_place_trends(woeid, count=50)
+            trends = self.api_client.get_place_trends(woeid, count=50)
             if trends and trends[0]:
                 print(f"トレンド取得成功: {len(trends[0]['trends'])}件")
                 return trends[0]['trends']

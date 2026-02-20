@@ -4,351 +4,190 @@
 
 ---
 
-## 📋 目次
-
-1. [システム概要](#システム概要)
-2. [ディレクトリ構造](#ディレクトリ構造)
-3. [使用ツール・スキル](#使用ツールスキル)
-4. [投稿フロー](#投稿フロー)
-5. [コンテンツ管理](#コンテンツ管理)
-6. [運用ルール](#運用ルール)
-7. [トラブルシューティング](#トラブルシューティング)
-
----
-
 ## システム概要
 
-ホッケのX運用は、以下の3つの柱で構成されています：
+ホッケのX運用は、以下の3つの柱で構成:
 
 | 機能 | 担当ツール | 役割 |
 |------|----------|------|
-| **投稿予約** | post-scheduler (x_poster.py) | 投稿のスケジュール管理・自動投稿 |
+| **リアルタイム投稿** | `x_cli.py`, `post_scheduler/auto_post.py` | 実行時生成→即投稿 |
 | **画像生成** | x-post-image-generator | 投稿用画像の自動生成 |
 | **エンゲージメント分析** | post-analyzer | 投稿パフォーマンスの分析・改善 |
 
-### システム設計の原則
+### 設計原則
 
-1. **ホッケの声を崩さない** - 全てのコンテンツはペルソナに準拠
-2. **AI運用の強みを活かす** - 安定した投稿頻度、高速リプライ、トレンド反応
-3. **手間を最小化** - テンプレート・自動化で運用コストを下げる
-4. **データドリブン** - 分析結果に基づいて改善を継続
+1. ホッケの声を崩さない  
+2. 投稿・リプライの実行を自動化して運用負荷を下げる  
+3. コストと成果を可視化する  
+4. 分析結果を次の運用に反映する
 
 ---
 
 ## ディレクトリ構造
 
-```
+```text
 ~/pjt/hokke_x/
-├── SYSTEM.md                  # このファイル（システム全体のドキュメント）
-├── PERSONA.md                 # ペルソナ定義（変更不可）
-├── STRATEGY.md                # 戦略アイデアストック
-├── STRATEGY_FINAL.md          # 採用戦略の決定版
-│
-├── post_scheduler/            # 投稿予約システム
-│   ├── post_queue.json        # 予約投稿キュー（GitHub Actionsが読み取り）
-│   ├── thread_templates/      # スレッド投稿テンプレート
-│   ├── post_templates/        # 単独投稿テンプレート
-│   ├── images/                # 画像ストック（未予約）
-│   └── x_poster.py            # 投稿スクリプト
-│
-├── content_stock/             # ネタストック
-│   ├── relaxation.json        # 脱力系ネタ
-│   ├── sharp_one_liners.json  # 鋭い一言
-│   ├── daily_observation.json # 日常観察
-│   └── questions.json         # 質問系
-│
-├── analytics/                 # 分析データ
-│   ├── analysis_data.json     # 生データ
-│   └── ANALYSIS_REPORT.md     # 分析レポート
-│
-└── scheduled_images/          # 予約済み画像（GitHub Actionsから参照）
+├── SYSTEM.md
+├── PERSONA.md
+├── STRATEGY.md
+├── STRATEGY_FINAL.md
+├── x_cli.py                        # 投稿/リプライ共通入口
+├── post_scheduler/
+│   ├── auto_post.py                # リアルタイム自動投稿（確率ゲート）
+│   ├── auto_post_state.json        # 日次目標状態（git管理外）
+│   ├── auto_post.log               # 投稿ログ
+│   ├── x_poster.py                 # 即時投稿実行
+│   ├── x_api_client.py             # X API共通クライアント
+│   └── cost_logger.py              # API課金イベント記録
+├── reply_system/
+│   ├── reply_engine.py
+│   ├── fetch_candidates.py
+│   ├── post_claude_reply.py
+│   └── reply_log.json
+├── notifications/
+│   └── discord_notifier.py         # Discord通知共通モジュール
+├── analytics/
+│   ├── x_api_usage.jsonl           # API利用ログ
+│   └── daily_cost_report.py        # 日次コスト集計/通知
+└── content_stock/
 ```
 
 ---
 
 ## 使用ツール・スキル
 
-### 1. Post Scheduler (投稿予約)
+### 1. リアルタイム投稿
 
-**スキル:** `post-scheduler`
-
-**役割:** 投稿のスケジュール管理とGitHub Actions経由の自動投稿
+**スキル:** `hokke-post`  
+**役割:** 投稿文を生成し、`x_cli.py` 経由で即時投稿
 
 **基本コマンド:**
 ```bash
-# テキスト投稿の予約
-cd ~/pjt/hokke_x/post_scheduler
-python x_poster.py --schedule "2026-02-18 08:00" --text "今日も何もしなかった。最高"
-
-# 画像付き投稿
-python x_poster.py --schedule "2026-02-18 08:00" --text "寝てた" --image "path/to/cat.jpg"
-
-# スレッド投稿
-python x_poster.py --schedule "2026-02-18 08:00" --thread thread.json
+cd ~/pjt/hokke_x
+python3 x_cli.py post --text "今日も何もしなかった。最高" --hook-category "脱力系"
 ```
 
-**GitHubへのプッシュ（必須）:**
+### 2. 自動投稿（確率ゲート）
+
+`auto_post.py --auto-decide` は、以下で投稿可否を判定:
+- 1日目標投稿数: 4〜5件（ランダム）
+- 最小間隔: 120分
+- 残り枠に応じた確率抽選
+
 ```bash
-cd ~/pjt/x_auto  # GitHubリポジトリ
-cp ~/pjt/hokke_x/post_scheduler/post_queue.json post_queue.json
-cp -r ~/pjt/hokke_x/scheduled_images/* scheduled_images/
-git add post_queue.json scheduled_images/
-git commit -m "Schedule: [内容]"
-git push origin main
+cd ~/pjt/hokke_x
+python3 post_scheduler/auto_post.py \
+  --auto-decide \
+  --min-daily-posts 4 \
+  --max-daily-posts 5 \
+  --min-interval-minutes 120 \
+  --run-interval-minutes 30
 ```
 
-> **注意:** `post_queue.json` をGitHubにプッシュしないと予約が有効になりません。
+### 3. リプライ運用
 
-### 2. 画像運用
+**スキル:** `hokke-reply`, `hokke-reply-auto`, `hokke-reply-claude`
 
-**基本方針:** AI生成画像がメイン。リアル猫写真はたまに。
-
-#### AI生成画像（メイン）
-
-**スキル:** `x-post-image-generator`
-
-**スタイル:** シュール・脱力・ゆるい。ホッケの世界観に合うものだけ。
-
-**向いてるもの:**
-- 脱力系イラスト（猫が何もしてない絵、ゆるい風景）
-- シュールな一枚絵（テキスト投稿の補強に）
-- プロフ画像・ヘッダーなどの固定素材
-
-**向いてないもの（使わない）:**
-- Data Viz（データ可視化）→ ホッケはニュース解説しない
-- Bento Grid（情報整理）→ ホッケは教育コンテンツ作らない
-- 意識高い系のデザイン全般
-
-**生成時の注意:**
-- 日本語フォント指定必須（中国語フォントになりがち）
-- 加工しすぎない。ゆるさを維持。
-- 保存先: `post_scheduler/images/` または `scheduled_images/`
-
-#### リアル猫写真（サブ）
-
-- 頻度: たまに（無理に毎日撮らない）
-- 一言添える：「寝てた」「起きた」「何か用？」
-- 背景の個人情報写り込みに注意
-- 加工しすぎない。ありのまま。
-
-### 3. Post Analyzer (エンゲージメント分析)
-
-**スキル:** `post-analyzer`
-
-**役割:** 投稿パフォーマンスの分析・改善提案
-
-**分析方法:**
-- **CSV方式（推奨）:** Chrome拡張機能でエクスポートしたCSVを使用
-- **API方式:** X API経由（制限あり）
-
-**コマンド:**
 ```bash
-# CSV分析
-python csv_analyzer.py --batch-size 20 "path/to/export.csv"
-
-# レポート生成
-python generate_report.py
+cd ~/pjt/hokke_x
+python3 x_cli.py reply discover
+python3 x_cli.py reply run
+python3 x_cli.py reply status
 ```
+
+### 4. 日次コスト通知（Discord）
+
+```bash
+cd ~/pjt/hokke_x
+python3 analytics/daily_cost_report.py --yesterday --notify-discord
+```
+
+必要な環境変数:
+- `DISCORD_WEBHOOK_COST`
 
 ---
 
 ## 投稿フロー
 
-### 通常投稿のフロー
+### 通常投稿
 
-```
+```text
 1. ネタ出し
-   ↓
-2. テンプレート選択 or 新規作成
-   ↓
-3. ホッケの声で文言調整
-   ↓
-4. 必要に応じて画像生成
-   ↓
-5. 投稿予約 (x_poster.py)
-   ↓
-6. GitHubにプッシュ
-   ↓
-7. 自動投稿（GitHub Actions）
+2. 文面生成
+3. auto_postのゲート判定
+4. 投稿実行（x_cli.py post）
+5. hook_performance.json に記録
+6. 後日エンゲージメント分析
 ```
 
-### リプライ対応のフロー
+### リプライ
 
-```
-リプライ受信
-   ↓
-即時対応（AI）
-   ↓
-ホッケの声で短く返す
-   ↓
-「ありがとう」より「にゃ」
-```
-
-### 分析・改善のフロー
-
-```
-1週間〜1ヶ月ごと
-   ↓
-エンゲージメントデータ収集
-   ↓
-分析（post-analyzer）
-   ↓
-レポート生成
-   ↓
-改善アクション決定
-   ↓
-次回投稿に反映
-```
-
----
-
-## コンテンツ管理
-
-### テンプレート
-
-投稿テンプレートは `post_scheduler/post_templates/` に保存します。
-
-**テンプレート例:**
-```json
-{
-  "name": "脱力系テンプレート1",
-  "category": "relaxation",
-  "template": "布団から出る理由が見つからない",
-  "hashtags": [],
-  "image_style": "none"
-}
-```
-
-### ネタストック
-
-ネタストックは `content_stock/` にJSON形式で管理します。
-
-**relaxation.json:**
-```json
-[
-  {
-    "text": "今日も何もしなかった。最高",
-    "used": false
-  },
-  {
-    "text": "やる気出す方法？出さなくていいよ",
-    "used": false
-  }
-]
-```
-
-**sharp_one_liners.json:**
-```json
-[
-  {
-    "text": "SNSで怒ってる人、だいたい疲れてるだけ",
-    "used": false
-  },
-  {
-    "text": "生産性？猫は1日16時間寝るけど幸せだよ",
-    "used": false
-  }
-]
+```text
+1. discover で候補収集
+2. reply で本文生成/投稿
+3. reply_log.json に記録
+4. 必要に応じてDiscord報告
 ```
 
 ---
 
 ## 運用ルール
 
-### 投稿頻度
+### 投稿
 
-- **1日2〜4回**（多すぎない。猫だから。）
-- **時間帯:**
-  - 朝: 7:00-8:00
-  - 昼: 12:00-13:00
-  - 夜: 21:00-23:00
+- 目標: 1日4〜5件
+- 最小間隔: 120分
+- 実行頻度: 30分おき
+- 固定時刻投稿は避ける
 
-### 画像使用頻度
+### リプライ
 
-- **AI生成画像:** 投稿に合わせて適宜（テキストだけで成立するなら無理に付けない）
-- **リアル猫写真:** たまに（撮れた時に。無理に毎日撮らない）
+- 日次上限を守る
+- 政治・宗教・炎上系はスキップ
+- 攻撃的にならない
 
-### リプライ対応
+### 画像
 
-- 基本全リプライに返す
-- 短くていい（「にゃ」「そう？」）
-- 長文は避ける
-
-### ホッケの声のチェックリスト
-
-投稿前に以下を確認：
-
-- [ ] 頑張ってない？
-- [ ] 「ありがとう」を言ってない？（「にゃ」でいい）
-- [ ] 自己啓発してない？
-- [ ] 絵文字使いすぎてない？
-- [ ] ホッケっぽい？
+- 無理に毎回付けない
+- AI画像は世界観優先
+- 個人情報の写り込み注意
 
 ---
 
 ## トラブルシューティング
 
-### 投稿が反映されない
+### 投稿されない
 
-**原因:** GitHubにプッシュしていない
+原因候補:
+- ゲート抽選でスキップ
+- 最小間隔未満
+- 日次上限到達
+- 生成失敗
 
-**解決:**
-```bash
-cd ~/pjt/x_auto
-git status  # 変更を確認
-git add .
-git commit -m "Fix: [内容]"
-git push origin main
-```
+確認先:
+- `post_scheduler/auto_post.log`
 
-### 画像が表示されない
+### コスト通知が来ない
 
-**原因:** `scheduled_images/` に画像がコピーされていない
+確認:
+- `DISCORD_WEBHOOK_COST` が有効か
+- `analytics/cost_notify.log` のエラー内容
 
-**解決:**
-```bash
-cp ~/pjt/hokke_x/post_scheduler/images/*.jpg ~/pjt/x_auto/scheduled_images/
-cd ~/pjt/x_auto
-git add scheduled_images/
-git commit -m "Add images"
-git push
-```
+### 課金が想定より高い
 
-### 日本語が中国語フォントになる
-
-**原因:** 画像生成時に日本語フォント指定がない
-
-**解決:** プロンプトに以下を追加
-```
-LANGUAGE SPECIFICATION (CRITICAL):
-- All Japanese text must be in JAPANESE (日本語)
-- Use JAPANESE font rendering, NOT Chinese
-- Font style: Japanese gothic/sans-serif (ゴシック体)
-```
+確認:
+- `analytics/x_api_usage.jsonl`
+- `python3 analytics/daily_cost_report.py --yesterday --json`
 
 ---
 
-## 付録
+## 明示的な非推奨
 
-### 関連ドキュメント
+- `x_poster.py --schedule` を使った予約投稿
+- `post_queue.json` をGitHub pushして実行する運用
 
-- [PERSONA.md](./PERSONA.md) - ホッケのペルソナ定義
-- [STRATEGY_FINAL.md](./STRATEGY_FINAL.md) - 採用戦略の決定版
-- [post-scheduler SKILL.md](/home/sekiz/.openclaw/skills/post-scheduler/SKILL.md) - 投稿予約の詳細
-- [x-post-image-generator SKILL.md](/home/sekiz/.openclaw/skills/x-post-image-generator/SKILL.md) - 画像生成の詳細
-- [post-analyzer SKILL.md](/home/sekiz/.openclaw/skills/post-analyzer/SKILL.md) - 分析の詳細
+現在はリアルタイム投稿を標準とする。
 
 ---
 
-*最終更新: 2026-02-17*
-
----
-
-## 運用気づき
-
-運用から得た学びを記録し、システム全体に反映する。
-
-| 日付 | 気づき | 改善アクション | 適用ファイル |
-|---|---|---|---|
-| 2026-02-17 | トレンド監視はX API Freeプランでは制限あり | トレンド監視機能を一時保留。ドキュメント化 | docs/TREND_WATCHER_PAUSED.md |
-|  |  |  |  |
+*最終更新: 2026-02-20*
