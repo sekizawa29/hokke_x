@@ -124,6 +124,8 @@ class ReplyEngine:
 
         added = 0
         for category, query in queries_to_run:
+            if category in self.SKIP_CATEGORIES:
+                continue
             print(f"検索中: '{query}' ({category})")
             result = self.search_tweets(query, per_query)
 
@@ -143,6 +145,17 @@ class ReplyEngine:
 
         print(f"新規ターゲット: {added}件")
         return added
+
+    # --- カテゴリフィルタ ---
+
+    SKIP_CATEGORIES = {"テック系"}
+
+    def _is_skip_category_user(self, username: str) -> bool:
+        """ターゲットリストでスキップカテゴリに登録されているか確認"""
+        for t in self.targets:
+            if t.get("username") == username and t.get("category") in self.SKIP_CATEGORIES:
+                return True
+        return False
 
     # --- NGフィルタ ---
 
@@ -328,22 +341,15 @@ JSON形式で出力。他の文字は一切含めないこと。
             return None
 
         # --- Step 2: リプ生成 ---
-        system_prompt = """あなたは「ホッケ」というキャラクターです。以下のペルソナに厳密に従ってリプライを生成してください。
+        system_prompt = f"""あなたは「ホッケ」というキャラクターです。以下のペルソナ定義に厳密に従ってリプライを生成してください。
 
-## ペルソナ要約
-- チャトラの猫。脱力してる。シュール。たまに鋭い。
-- 一人称: 使わないか「俺」。「僕」「私」は使わない。
-- 語尾キャラにしない。「〜にゃ」は封印。自然な話し言葉。
-- 短文。体言止め多め。句読点少なめ。タメ口。
-- 絶対やらないこと: 意識高い発言、説教、自己啓発、過度な共感（「わかるー！」）、媚び、絵文字の乱用
-- 優しいけど甘くない。慰めない。でも否定もしない。
+{self.persona}
 
-## リプライのルール
+## リプライのルール（ポストとは別の制約）
 - 1〜2文で短く返す（最大80文字程度）
 - 「すごい」「いいね」「わかる」だけの薄いリプはしない
 - 相手のツイート内容に対してホッケらしい視点でコメントする
 - 猫の視点から人間を観察するような一言が理想
-- 攻撃的にならない。でも媚びない。
 - リプライ本文のみを出力。説明や前置きは不要。"""
 
         user_prompt = f"以下のツイートにホッケとしてリプライしてください。\n\nツイート: {tweet_text}"
@@ -418,6 +424,9 @@ JSON形式で出力。他の文字は一切含めないこと。
         for qi, (category, query) in enumerate(queries_to_run):
             if posted >= remaining:
                 break
+            if category in self.SKIP_CATEGORIES:
+                print(f"[skip] カテゴリ '{category}' はリプライ対象外")
+                continue
             print(f"\n[query {qi+1}/{len(queries_to_run)}] 検索中: '{query}' ({category})")
             result = self.search_tweets(query, per_query)
             tweets = result.get("data", [])
@@ -439,6 +448,9 @@ JSON形式で出力。他の文字は一切含めないこと。
                 seen_tweet_ids.add(tweet_id)
 
                 if not username or username == "cat_hokke":
+                    skipped += 1
+                    continue
+                if self._is_skip_category_user(username):
                     skipped += 1
                     continue
                 if followers < min_followers or followers > max_followers:
