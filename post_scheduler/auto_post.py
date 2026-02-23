@@ -20,6 +20,7 @@ PERFORMANCE_FILE = PROJECT_DIR / "hook_performance.json"
 LOG_FILE = SCRIPT_DIR / "auto_post.log"
 X_POSTER = SCRIPT_DIR / "x_poster.py"
 STATE_FILE = SCRIPT_DIR / "auto_post_state.json"
+STRATEGY_FILE = SCRIPT_DIR / "strategy.json"
 
 
 def log(msg: str) -> None:
@@ -69,12 +70,18 @@ def _load_posts() -> list[dict]:
 
 def _today_post_count(now: datetime) -> int:
     today = now.date().isoformat()
-    return sum(1 for p in _load_posts() if str(p.get("postedAt", "")).startswith(today))
+    return sum(
+        1 for p in _load_posts()
+        if str(p.get("postedAt", "")).startswith(today)
+        and p.get("tweet_type") != "reply"
+    )
 
 
 def _last_post_at() -> datetime | None:
     latest = None
     for post in _load_posts():
+        if post.get("tweet_type") == "reply":
+            continue
         dt = _parse_posted_at(post.get("postedAt", ""))
         if not dt:
             continue
@@ -166,13 +173,37 @@ def decide_should_post(
     return should_post, reason
 
 
+def load_strategy() -> dict:
+    if not STRATEGY_FILE.exists():
+        return {}
+    try:
+        with open(STRATEGY_FILE, encoding="utf-8") as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
 def build_prompt(persona: str, drop_categories: list[str]) -> str:
-    drop_note = ""
-    if drop_categories:
-        drop_note = f"\n\n【避けるカテゴリ（直近DROP）】\n" + "\n".join(f"- {c}" for c in drop_categories)
+    strategy = load_strategy()
+    preferred = strategy.get("preferred_categories", [])
+    avoid = list(set(drop_categories + strategy.get("avoid_categories", [])))
+    guidance = strategy.get("guidance", "")
+    updated_at = strategy.get("updated_at", "")
+
+    avoid_note = ""
+    if avoid:
+        avoid_note = f"\n\n【避けるカテゴリ】\n" + "\n".join(f"- {c}" for c in avoid)
+
+    preferred_note = ""
+    if preferred:
+        preferred_note = f"\n\n【優先カテゴリ（直近パフォーマンス良好）】\n" + "\n".join(f"- {c}" for c in preferred)
+
+    guidance_note = ""
+    if guidance:
+        guidance_note = f"\n\n【本日の投稿指針（{updated_at}更新）】\n{guidance}"
 
     return f"""あなたはホッケというチャトラ猫のXアカウントを運営している。
-以下のペルソナに従い、今すぐ投稿するツイートを1件生成せよ。{drop_note}
+以下のペルソナに従い、今すぐ投稿するツイートを1件生成せよ。{avoid_note}{preferred_note}{guidance_note}
 
 【ペルソナ定義】
 {persona}
