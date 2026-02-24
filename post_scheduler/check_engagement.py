@@ -258,18 +258,21 @@ def sync_timeline(api_client: XApiClient, data: dict) -> int:
     return added + updated
 
 
-VALID_HOOK_CATEGORIES = ["猫写真", "鋭い一言", "日常観察", "脱力系", "時事ネタ", "たまに有益"]
+VALID_HOOK_CATEGORIES = ["猫写真", "鋭い一言", "日常観察", "脱力系", "時事ネタ", "たまに有益", "猫Meme", "猫vs人間", "シュール猫"]
 
 CATEGORIZE_SYSTEM_PROMPT = """あなたはホッケ（茶トラ猫AIアカウント）の投稿分析アシスタントです。
 与えられた投稿テキストを以下のカテゴリのどれか1つに分類してください。
 
 カテゴリ一覧:
-- 猫写真: 画像付き、猫の様子を見せる投稿
+- 猫写真: 画像付き、猫の様子を見せる投稿（リアル猫写真）
 - 鋭い一言: 人間vs猫の哲学的観察、社会への皮肉・気づき
 - 日常観察: 飼い主や日常の出来事を淡々と描写
 - 脱力系: やる気のなさ・眠い・どうでもいい系
 - 時事ネタ: 時事・トレンドへの猫目線コメント
 - たまに有益: 実用的・有益な情報を含む
+- 猫Meme: 共感・あるある系のMeme画像付き投稿
+- 猫vs人間: 猫と人間の生活を対比する画像付き投稿
+- シュール猫: 猫が人間の行動をしているシュール画像付き投稿
 
 カテゴリ名のみを1単語で返してください。余計な説明は不要です。"""
 
@@ -342,7 +345,7 @@ def print_recommend(data: dict) -> None:
     """今日の投稿カテゴリ推薦を表示（APIコールなし）"""
     from collections import defaultdict
 
-    VALID_CATEGORIES = ["脱力系", "猫写真", "鋭い一言", "日常観察", "時事ネタ", "たまに有益", "未分類"]
+    VALID_CATEGORIES = ["脱力系", "猫写真", "鋭い一言", "日常観察", "時事ネタ", "たまに有益", "猫Meme", "猫vs人間", "シュール猫", "未分類"]
 
     # 診断済み投稿をカテゴリ別に分類（投稿日時順）
     categories: dict = defaultdict(list)
@@ -614,7 +617,7 @@ def run_act(data: dict) -> None:
 - preferred_categories: インプレッション・いいねが高いカテゴリを1〜3個
 - avoid_categories: DROP が続いているカテゴリ（なければ空配列）
 - guidance: ホッケのペルソナに沿った具体的な投稿の方向性
-- カテゴリは 脱力系/猫写真/鋭い一言/日常観察/時事ネタ/たまに有益 から選ぶ"""
+- カテゴリは 脱力系/猫写真/鋭い一言/日常観察/時事ネタ/たまに有益/猫Meme/猫vs人間/シュール猫 から選ぶ"""
 
     print("[act] Claude で戦略を生成中...", flush=True)
     result = _call_claude(prompt, timeout=60)
@@ -634,8 +637,22 @@ def run_act(data: dict) -> None:
     except json.JSONDecodeError as e:
         print(f"[act] JSON パース失敗: {e}", flush=True)
         return
+    if not isinstance(strategy, dict):
+        print(f"[act] JSON が dict でない: {type(strategy).__name__}", flush=True)
+        return
 
+    # 既存の非LLMフィールド（image_probability 等）を保持してマージ
     STRATEGY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    _PRESERVE_KEYS = ("max_image_posts_per_day",)
+    if STRATEGY_FILE.exists():
+        try:
+            with open(STRATEGY_FILE, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+            for k in _PRESERVE_KEYS:
+                if k in existing and k not in strategy:
+                    strategy[k] = existing[k]
+        except (OSError, json.JSONDecodeError):
+            pass
     with open(STRATEGY_FILE, "w", encoding="utf-8") as f:
         json.dump(strategy, f, ensure_ascii=False, indent=2)
 
