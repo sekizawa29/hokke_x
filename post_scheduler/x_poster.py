@@ -52,7 +52,7 @@ class XPoster:
             print(f"認証エラー: {e}")
             return False
 
-    def _record_to_hook_performance(self, tweet_id: str, text: str, hook_category: str) -> None:
+    def _record_to_hook_performance(self, tweet_id: str, text: str, hook_category: str, tweet_type: str = "post") -> None:
         if HOOK_PERF_FILE.exists():
             with open(HOOK_PERF_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -63,6 +63,7 @@ class XPoster:
             "tweet_id": str(tweet_id),
             "text": text,
             "hookCategory": hook_category,
+            "tweet_type": tweet_type,
             "postedAt": datetime.now().astimezone().strftime('%Y-%m-%dT%H:%M:%S'),
             "engagementFetchedAt": None,
             "likes": None, "retweets": None, "replies": None, "quotes": None,

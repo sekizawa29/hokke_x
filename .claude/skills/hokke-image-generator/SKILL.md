@@ -1,8 +1,8 @@
 ---
 name: hokke-image-generator
 description: ホッケ（茶トラ猫AI）のペルソナに合わせた画像を生成するスキル。Nano Banana Proを使用。
-version: 1.1
-updated: 2026-02-20
+version: 1.2
+updated: 2026-02-23
 ---
 
 # hokke-image-generator
@@ -43,6 +43,28 @@ updated: 2026-02-20
 - 「なんかいいな」と思わせる画像が正解。
 - 裕福すぎる家・小綺麗すぎるインテリアにしない。
 
+### 構図の鉄則：猫主役・背景控えめ
+
+**何枚生成しても間取りに違和感を覚えさせないこと**が最優先。
+
+- **猫がフレームの2/3以上を占める**構図にする。猫に寄る。
+- 背景は**ボケ処理**で曖昧にする（f/1.4〜f/2.0の浅い被写界深度）。
+- 背景に映るのは「なんとなく北海道の家っぽい空気感」程度でOK。
+  - 窓の光、フローリングの質感、ストーブのオレンジの灯り、畳の色味 etc.
+  - 家具や部屋の全体像は映さない。
+- 間取り図は**猫がどの場所にいるかの文脈設定**として参照する。背景の再現素材ではない。
+- 広角で部屋全体を見せるワイドショットは原則NG。
+
+#### 良い構図の例
+- 猫の顔〜上半身アップ、背景にストーブの灯りがぼんやり
+- 窓際で丸くなっている猫、窓の光がボケて差し込む
+- 飼い主の机の上で寝ている猫のアップ、ケーブルが少しだけ見える
+
+#### 悪い構図の例
+- 部屋の全景が映っていて猫が1/3以下
+- 家具の配置や間取りがはっきり分かるワイドショット
+- 複数の部屋が同時に見えるような引きの構図
+
 ---
 
 ## スタイル選択
@@ -65,18 +87,18 @@ updated: 2026-02-20
   "image_type": "Lifestyle photography, warm everyday moment, film grain aesthetic",
   "time_period_and_year": "Contemporary, timeless casual feel",
   "mood_and_vibe": "Quiet northern Japan afternoon. Slow, unhurried, slightly cold outside, warm inside.",
-  "subject": "Orange tabby cat (茶トラ), relaxed posture, not looking at camera",
+  "subject": "Orange tabby cat (茶トラ), relaxed posture, not looking at camera. Close-up, cat fills most of the frame.",
   "clothing": "neutral",
   "hair": "Short dense fur, warm orange and cream tabby stripes",
   "face": "Neutral expression, half-closed eyes, unbothered",
   "accessories": "neutral",
   "action": "Sitting or lying at the window-side hallway, looking outside, tail loosely curled",
-  "location": "Interior of an older Japanese house in Hokkaido. Double-pane windows with slight condensation. Old wooden floor, faded tatami visible in adjacent room. Low winter light coming through.",
-  "lighting": "Soft diffused daylight through double-pane window, cool 4500K, subtle shadows. Northern Japan light — not harsh, slightly grey.",
-  "camera_angle_and_framing": "Low angle, candid, cat fills 1/3 of frame, room and window dominant",
-  "camera_equipment": "35mm film camera feel, f/2.0, slight vignette, fine grain",
-  "style": "Muted cool tones, aged wood, faded fabric, lived-in domestic feel. Not Instagram-pretty.",
-  "negative_prompt": "posed, looking at camera, luxury interior, new furniture, bright colors, text, logo, studio lighting"
+  "location": "Interior of an older Japanese house in Hokkaido. Background heavily blurred — only hints of double-pane window light, old wooden floor texture, faded colors.",
+  "lighting": "Soft diffused daylight through double-pane window, cool 4500K, subtle shadows on cat's fur. Northern Japan light — not harsh, slightly grey.",
+  "camera_angle_and_framing": "Close-up, low angle, cat fills 2/3 of frame. Background is soft bokeh — room details barely discernible.",
+  "camera_equipment": "85mm portrait lens, f/1.4, shallow depth of field, heavy background bokeh, slight vignette, fine grain",
+  "style": "Muted cool tones, lived-in domestic feel suggested through light and texture only. Not Instagram-pretty.",
+  "negative_prompt": "wide shot, full room visible, furniture in focus, posed, looking at camera, luxury interior, new furniture, bright colors, text, logo, studio lighting"
 }
 ```
 
@@ -87,18 +109,18 @@ updated: 2026-02-20
   "image_type": "Candid photography, slightly surreal everyday moment",
   "time_period_and_year": "Contemporary, ordinary weekday feel",
   "mood_and_vibe": "Dry humor. The cat is clearly unimpressed. Something mundane is happening but the cat doesn't care.",
-  "subject": "Orange tabby cat, completely unbothered expression",
+  "subject": "Orange tabby cat, completely unbothered expression. Close-up portrait, cat is the dominant subject.",
   "clothing": "neutral",
   "hair": "Short tabby fur, orange and cream",
   "face": "Deadpan, thousand-yard stare, zero emotion",
   "accessories": "neutral",
-  "action": "Sitting next to tangled cables on a desk, or near a noisy oil heater, or on top of a pile of unfolded laundry",
-  "location": "Hokkaido house interior. Living room corner with a cluttered PC desk — multiple cables, a cold coffee mug, random papers. FF oil heater visible in background. NITORI-style furniture.",
-  "lighting": "Neutral indoor lighting, overcast daylight from double-pane window, slightly flat",
-  "camera_angle_and_framing": "Eye-level with cat, environment visible, cat center-left",
-  "camera_equipment": "Standard zoom lens, f/4, nothing fancy",
-  "style": "Flat, documentary. Slightly desaturated. Lived-in messiness is the point.",
-  "negative_prompt": "cute poses, cartoon, exaggerated reactions, luxury items, clean desk, bright colors, dramatic lighting, text"
+  "action": "Sitting next to tangled cables, or near an oil heater, chin resting on paws",
+  "location": "Hokkaido house interior. Background out of focus — just hints of cluttered desk, cables, a coffee mug, warm heater glow. All blurred.",
+  "lighting": "Neutral indoor lighting, overcast daylight from window, slightly flat, focused on cat's face",
+  "camera_angle_and_framing": "Eye-level close-up with cat, cat fills 2/3 of frame, background is blurred bokeh",
+  "camera_equipment": "85mm, f/1.8, shallow depth of field, background bokeh",
+  "style": "Flat, documentary. Slightly desaturated. Domestic mess hinted at through blurred background only.",
+  "negative_prompt": "wide shot, full room visible, furniture layout visible, cute poses, cartoon, exaggerated reactions, luxury items, clean desk, bright colors, dramatic lighting, text"
 }
 ```
 
@@ -106,21 +128,21 @@ updated: 2026-02-20
 
 ```json
 {
-  "image_type": "Atmospheric photography, mood-driven, minimal subject",
+  "image_type": "Atmospheric close-up photography, mood-driven",
   "time_period_and_year": "Timeless, Hokkaido seasonal moment",
   "mood_and_vibe": "The particular quiet of a Hokkaido winter afternoon. Time moves slowly. Cold outside, warm inside.",
-  "subject": "Orange tabby cat silhouette or partial view, not the main subject",
+  "subject": "Orange tabby cat close-up, fur lit by cold window light, contemplative",
   "clothing": "neutral",
-  "hair": "Fur catching cold window light",
-  "face": "Not visible or in shadow",
+  "hair": "Fur catching cold window light, individual hairs visible",
+  "face": "Calm, slightly squinting, looking toward window",
   "accessories": "neutral",
-  "action": "Sitting at double-pane window watching snowfall outside, breath slightly fogging the glass",
-  "location": "Hokkaido house window interior. Snow-covered garden visible outside — modest yard, an old rusted storage shed in the corner, sparse trees. Inside: wooden window frame, old curtain.",
-  "lighting": "Flat cold daylight from overcast Hokkaido winter sky. Cool 5000K. Interior slightly warm from oil heater.",
-  "camera_angle_and_framing": "Cat in silhouette against window, snow visible outside, wide enough to feel the room",
-  "camera_equipment": "50mm, f/1.8, bokeh background",
-  "style": "Cool blues outside, warm amber inside. High contrast between cold window and warm room. Film look.",
-  "negative_prompt": "busy composition, cute expression, luxury interior, southern Japan scenery, cherry blossoms, text, logo"
+  "action": "Sitting at window, face and upper body close-up, faint condensation on glass in blurred background",
+  "location": "Hokkaido house window. Background is heavily bokeh — just cold white light from window, vague snow outside, warm amber tones from room interior.",
+  "lighting": "Flat cold daylight from overcast Hokkaido winter sky on cat's face. Cool 5000K. Faint warm glow from behind (oil heater).",
+  "camera_angle_and_framing": "Close-up portrait of cat against window light. Cat fills 2/3 of frame. Window is blurred bright background.",
+  "camera_equipment": "85mm, f/1.4, heavy bokeh, film look",
+  "style": "Cool blues from window, warm amber from room. Contrast visible on cat's fur. Film grain.",
+  "negative_prompt": "wide shot, full room visible, garden detail in focus, busy composition, luxury interior, southern Japan scenery, cherry blossoms, text, logo"
 }
 ```
 
@@ -128,21 +150,21 @@ updated: 2026-02-20
 
 ```json
 {
-  "image_type": "Candid lifestyle photography, summer mood",
+  "image_type": "Candid lifestyle close-up photography, summer mood",
   "time_period_and_year": "Contemporary Hokkaido summer, brief and precious",
-  "mood_and_vibe": "Unusually warm day for Hokkaido. Windows wide open. Electric fan running. The cat is mildly bothered by the heat but managing.",
-  "subject": "Orange tabby cat, slightly sprawled, not looking at camera",
+  "mood_and_vibe": "Unusually warm day for Hokkaido. The cat is mildly bothered by the heat but managing.",
+  "subject": "Orange tabby cat close-up, slightly sprawled, not looking at camera",
   "clothing": "neutral",
-  "hair": "Short tabby fur looking slightly ruffled",
-  "face": "Mild discomfort, narrowed eyes",
+  "hair": "Short tabby fur looking slightly ruffled, warm light on fur",
+  "face": "Mild discomfort, narrowed eyes, close-up expression",
   "accessories": "neutral",
-  "action": "Lying flat on cool wooden floor near open window, electric fan visible in background",
-  "location": "Hokkaido house interior, summer. Windows fully open — no AC unit visible. Electric fan (扇風機) on floor. Green garden visible outside through open window. Modest interior.",
-  "lighting": "Bright summer daylight, warm 5500K, natural shadows",
-  "camera_angle_and_framing": "Low angle looking up slightly, cat sprawled across frame, fan and window in background",
-  "camera_equipment": "35mm film, f/2.8, slight overexposure",
-  "style": "Warm but not glamorous. The particular flatness of a Hokkaido summer day.",
-  "negative_prompt": "AC unit, luxury interior, posed cat, cute expression, text, logo"
+  "action": "Lying flat, chin on floor, face close to camera. Breeze from open window suggested by fur movement.",
+  "location": "Hokkaido house interior, summer. Background blurred — just bright open window light, hint of green outside, maybe edge of electric fan. All soft bokeh.",
+  "lighting": "Bright summer daylight, warm 5500K, natural shadows on cat's face",
+  "camera_angle_and_framing": "Very low angle, face-level with cat on floor, close-up. Cat fills 2/3 of frame. Background is bright bokeh.",
+  "camera_equipment": "85mm, f/1.4, shallow depth of field, slight overexposure",
+  "style": "Warm but not glamorous. Hokkaido summer light on cat's fur is the focus.",
+  "negative_prompt": "wide shot, full room visible, AC unit, luxury interior, posed cat, cute expression, text, logo"
 }
 ```
 
@@ -173,7 +195,18 @@ uv run ~/.nvm/versions/node/v24.13.0/lib/node_modules/openclaw/skills/nano-banan
 
 ## 品質チェック
 
-- 猫が主役になりすぎていないか（雰囲気が主役）
+- **猫がフレームの2/3以上を占めているか**（最重要）
+- **背景がボケていて、間取りや家具配置が判別できないか**
 - テキスト・ロゴが混入していないか
 - 北海道・年収500万の生活感から外れていないか（豪華すぎ・小綺麗すぎ NG）
 - ホッケのペルソナと合っているか（脱力・シュール・北海道の家感）
+- 複数枚並べても間取りの矛盾を感じないか
+
+## 間取り図の使い方
+
+`docs/Room_1F.png` / `docs/Room_2F.png` に家の間取り図がある。
+
+- `--input-image` で参照画像として渡せる
+- 間取り図は**猫がどの部屋にいるかの文脈設定**に使う
+- 間取りの再現ではなく、その部屋にありそうな小物・光・空気感をヒントにする
+- 背景はボケ処理で曖昧にするため、間取りの正確な再現は不要

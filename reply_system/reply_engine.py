@@ -33,6 +33,7 @@ TARGETS_FILE = SCRIPT_DIR / "target_accounts.json"
 LOG_FILE = SCRIPT_DIR / "reply_log.json"
 NG_FILE = SCRIPT_DIR / "ng_keywords.json"
 PERSONA_FILE = PROJECT_DIR / "PERSONA.md"
+REPLY_STRATEGY_FILE = SCRIPT_DIR / "reply_strategy.json"
 
 load_dotenv(ENV_FILE)
 
@@ -61,6 +62,7 @@ class ReplyEngine:
         self.log = load_json(LOG_FILE)
         self.ng = load_json(NG_FILE)
         self.persona = self._load_persona()
+        self.reply_strategy = self._load_reply_strategy()
 
         self.bearer_token = os.getenv('X_BEARER_TOKEN')
         if not self.bearer_token:
@@ -73,6 +75,15 @@ class ReplyEngine:
         if PERSONA_FILE.exists():
             return PERSONA_FILE.read_text(encoding='utf-8')
         return ""
+
+    def _load_reply_strategy(self) -> dict:
+        if REPLY_STRATEGY_FILE.exists():
+            try:
+                with open(REPLY_STRATEGY_FILE, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except (json.JSONDecodeError, OSError):
+                pass
+        return {}
 
     def _is_enabled(self) -> bool:
         return self.config.get('enabled', False)
@@ -236,12 +247,17 @@ class ReplyEngine:
                 print("  claude コマンドが見つからない")
                 return None
 
+        # Remove Claude Code session markers to avoid nested-session detection
+        clean_env = {k: v for k, v in os.environ.items()
+                     if not k.startswith("CLAUDE")}
+
         try:
             result = subprocess.run(
                 [claude_cmd, "-p", prompt],
                 capture_output=True,
                 text=True,
                 timeout=timeout,
+                env=clean_env,
             )
         except subprocess.TimeoutExpired:
             print("  Claude呼び出しタイムアウト")
@@ -352,6 +368,11 @@ JSON形式で出力。他の文字は一切含めないこと。
 - 猫の視点から人間を観察するような一言が理想
 - リプライ本文のみを出力。説明や前置きは不要。"""
 
+        # 戦略の guidance があればプロンプトに追加
+        guidance = self.reply_strategy.get("guidance")
+        if guidance:
+            system_prompt += f"\n\n## 運用戦略メモ\n{guidance}"
+
         user_prompt = f"以下のツイートにホッケとしてリプライしてください。\n\nツイート: {tweet_text}"
 
         reply_raw = self._call_claude(system_prompt, user_prompt, timeout=60)
@@ -405,10 +426,17 @@ JSON形式で出力。他の文字は一切含めないこと。
             return {"posted": 0, "skipped": 0}
 
         keywords = self.config.get('search_keywords', {})
+        preferred = set(self.reply_strategy.get('preferred_categories', []))
+        avoid = set(self.reply_strategy.get('avoid_categories', []))
         query_pool = []
         for category, kws in keywords.items():
+            if category in avoid:
+                continue
             for kw in kws:
                 query_pool.append((category, kw))
+                # preferred カテゴリは2倍登録（選ばれやすくする）
+                if category in preferred:
+                    query_pool.append((category, kw))
         random.shuffle(query_pool)
         queries_to_run = query_pool[:max_queries]
 
@@ -492,6 +520,7 @@ JSON形式で出力。他の文字は一切含めないこと。
                     continue
 
                 # 投稿
+                reply_tweet_id = None
                 if dry_run:
                     print(f"  [DRY RUN] @{username} へ: {reply_text}")
                     status = "dry_run"
@@ -506,8 +535,14 @@ JSON形式で出力。他の文字は一切含めないこと。
                             print(f"連続失敗上限に到達 ({consecutive_failures})。セッション終了")
                             return {"posted": posted, "skipped": skipped}
                         continue
+                    reply_tweet_id = post_result.get('tweet_id')
+                    # hook_performance.json にカテゴリ付きで記録
+                    if reply_tweet_id:
+                        self.poster._record_to_hook_performance(
+                            reply_tweet_id, reply_text, category, tweet_type="reply"
+                        )
 
-                self.log.append({
+                log_entry = {
                     "date": date.today().isoformat(),
                     "timestamp": datetime.now().isoformat(),
                     "target_user": username,
@@ -517,7 +552,10 @@ JSON形式で出力。他の文字は一切含めないこと。
                     "category": category,
                     "status": status,
                     "source_query": query
-                })
+                }
+                if reply_tweet_id:
+                    log_entry["reply_tweet_id"] = reply_tweet_id
+                self.log.append(log_entry)
                 save_json(LOG_FILE, self.log)
 
                 # ターゲット情報更新（既存ターゲットのみ）

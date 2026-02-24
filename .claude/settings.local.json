@@ -1,7 +1,27 @@
 {
   "permissions": {
     "allow": [
-      "Bash(codex:*)"
+      "Bash(codex:*)",
+      "Bash(sudo mkdir:*)",
+      "Bash(sudo chown:*)",
+      "Bash(python3:*)",
+      "Bash(crontab -l 2>/dev/null)",
+      "Bash(which claude && claude --version)",
+      "Bash(python3 post_scheduler/check_engagement.py --sync; echo \"exit: $?\")",
+      "Bash(python3 post_scheduler/check_engagement.py --sync 2>&1; echo \"EXIT:$?\")",
+      "Bash(crontab -l)",
+      "Bash({ crontab -l | grep -v \"check_engagement\"; echo \"0 22 * * * /usr/bin/python3 check_engagement.py --sync --act >> /home/sekiz/pjt/hokke_x/post_scheduler/engagement_sync.log 2>&1\"; } | crontab -\ncrontab -l | grep check_engagement)",
+      "Bash(echo \"0 22 * * * /usr/bin/python3 check_engagement.py --sync --act >> /home/sekiz/pjt/hokke_x/post_scheduler/engagement_sync.log 2>&1\" >> /tmp/cron_tmp.txt && crontab /tmp/cron_tmp.txt && crontab -l | grep check_engagement)",
+      "Bash(cat /tmp/cron_base.txt /tmp/cron_new_entry.txt | crontab - && crontab -l | grep check_engagement)",
+      "Bash(cd /home/sekiz/pjt/hokke_x && wc -l post_scheduler/*.py reply_system/*.py | tail -1)",
+      "Bash(ls -la /home/sekiz/pjt/hokke_x/reply_system/*.py)",
+      "Bash(uv run ~/.nvm/versions/node/v24.13.0/lib/node_modules/openclaw/skills/nano-banana-pro/scripts/generate_image.py --help 2>&1 || true)",
+      "WebSearch",
+      "Bash(systemctl status cron)",
+      "Bash(printenv | grep -i CLAUDE)",
+      "Bash(grep -r \"playwright\\\\|selenium\\\\|browser\" /home/sekiz/pjt/hokke_x --include=\"*.py\" --include=\"*.md\" 2>/dev/null | head -20)",
+      "Bash(git status -u)",
+      "Bash(git add \\\\\n  .claude/settings.local.json \\\\\n  .claude/skills/hokke-image-generator/SKILL.md \\\\\n  PERSONA.md \\\\\n  post_scheduler/auto_post.py \\\\\n  post_scheduler/check_engagement.py \\\\\n  post_scheduler/x_api_client.py \\\\\n  post_scheduler/x_poster.py \\\\\n  post_scheduler/strategy.json \\\\\n  reply_system/reply_engine.py \\\\\n  reply_system/reply_log.json \\\\\n  reply_system/reply_strategy.json \\\\\n  reply_system/target_accounts.json \\\\\n  docs/api_cost_optimization.md \\\\\n  docs/floor_plan_spec.md \\\\\n  docs/Room_1F.png \\\\\n  docs/Room_2F.png)"
     ]
   }
 }

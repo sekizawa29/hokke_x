@@ -173,6 +173,13 @@ def decide_should_post(
     return should_post, reason
 
 
+def _recent_post_texts(limit: int = 7) -> list[tuple[str, str]]:
+    """直近の投稿(reply除く)からカテゴリとテキストを返す"""
+    posts = [p for p in _load_posts() if p.get("tweet_type") != "reply"]
+    posts.sort(key=lambda p: p.get("postedAt", ""), reverse=True)
+    return [(p.get("hookCategory", ""), p.get("text", "")) for p in posts[:limit]]
+
+
 def load_strategy() -> dict:
     if not STRATEGY_FILE.exists():
         return {}
@@ -202,8 +209,14 @@ def build_prompt(persona: str, drop_categories: list[str]) -> str:
     if guidance:
         guidance_note = f"\n\n【本日の投稿指針（{updated_at}更新）】\n{guidance}"
 
+    recent_note = ""
+    recent = _recent_post_texts()
+    if recent:
+        lines = [f"- [{cat or '未分類'}] {txt}" for cat, txt in recent]
+        recent_note = "\n\n【直近の投稿（同じテーマ・同じ切り口は避け、別の話題にすること）】\n" + "\n".join(lines)
+
     return f"""あなたはホッケというチャトラ猫のXアカウントを運営している。
-以下のペルソナに従い、今すぐ投稿するツイートを1件生成せよ。{avoid_note}{preferred_note}{guidance_note}
+以下のペルソナに従い、今すぐ投稿するツイートを1件生成せよ。{avoid_note}{preferred_note}{guidance_note}{recent_note}
 
 【ペルソナ定義】
 {persona}

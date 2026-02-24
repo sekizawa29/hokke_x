@@ -145,6 +145,19 @@ class XApiClient:
         )
         return trends
 
+    def get_me(self) -> Any:
+        """認証ユーザーの情報を取得（user_id キャッシュ用）"""
+        if not self.client:
+            self._init_user_auth()
+        response = self.client.get_me()
+        log_api_usage(
+            "user_read",
+            1,
+            "GET /2/users/me",
+            context="x_api_client.get_me",
+        )
+        return response
+
     # ---- bearer endpoints ----
     def _bearer_headers(self) -> dict[str, str]:
         if not self.bearer_token:
@@ -184,22 +197,29 @@ class XApiClient:
             )
         return data
 
-    def get_user_tweets(self, user_id: str, max_results: int = 10) -> list[dict]:
-        url = f"https://api.x.com/2/users/{user_id}/tweets"
-        params = {
-            "max_results": min(max_results, 100),
-            "tweet.fields": "created_at,public_metrics",
-            "exclude": "retweets,replies",
+    def get_user_tweets(
+        self,
+        user_id: str,
+        max_results: int = 100,
+        since_id: Optional[str] = None,
+    ) -> list[dict]:
+        if not self.client:
+            self._init_user_auth()
+        params: dict[str, Any] = {
+            "max_results": max(5, min(max_results, 100)),
+            "tweet_fields": ["created_at", "public_metrics", "non_public_metrics", "in_reply_to_user_id", "referenced_tweets"],
+            "exclude": ["retweets"],
         }
-        resp = requests.get(url, headers=self._bearer_headers(), params=params)
-        resp.raise_for_status()
-        data = resp.json().get("data", [])
+        if since_id:
+            params["since_id"] = since_id
+        response = self.client.get_users_tweets(user_id, user_auth=True, **params)
+        data = response.data or []
         log_api_usage(
             "post_read",
             len(data),
             f"GET /2/users/{user_id}/tweets",
             context="x_api_client.get_user_tweets",
-            metadata={"max_results": params["max_results"]},
+            metadata={"max_results": params["max_results"], "since_id": since_id},
         )
         return data
 
