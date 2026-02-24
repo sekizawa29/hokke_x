@@ -1,8 +1,8 @@
 ---
 name: hokke-image-generator
 description: ホッケ（茶トラ猫AI）のペルソナに合わせた画像を生成するスキル。Nano Banana Proを使用。
-version: 1.2
-updated: 2026-02-23
+version: 1.3
+updated: 2026-02-24
 ---
 
 # hokke-image-generator
@@ -39,7 +39,7 @@ updated: 2026-02-23
 
 - 説明しすぎない。雰囲気で語る。
 - ごちゃごちゃしない。余白を大事にする。
-- テキスト埋め込みは原則なし。
+- テキスト埋め込みは原則なし（Meme系は例外：最小限の英語テキストのみ可）。
 - 「なんかいいな」と思わせる画像が正解。
 - 裕福すぎる家・小綺麗すぎるインテリアにしない。
 
@@ -67,14 +67,23 @@ updated: 2026-02-23
 
 ---
 
-## スタイル選択
+## 画像カテゴリ一覧
 
-| 投稿タイプ | スタイル | 方針 |
-|-----------|---------|------|
-| 日常・つぶやき | 窓際・室内 | 北海道の家でまったりしてる情景 |
-| シュール・脱力 | 脱力コント | 飼い主の机周りやストーブ前など、生活感ある場所 |
-| 季節・時間帯 | 光と空気感 | 北海道の光。雪・緑・夕暮れ。猫はいても映り込む程度 |
-| ちょっと鋭いネタ | ミニマル | シンプルな室内の一角。 |
+| カテゴリ | テンプレート | 方針 |
+|---------|------------|------|
+| **リアル猫写真** | A〜D | 北海道の家で暮らす茶トラの日常。写実的。 |
+| **猫Meme** | E | 共感・あるある系。最小限のテキスト入り。シェアされやすさ重視。 |
+| **猫 vs 人間** | F | 猫と人間の生活の対比。分割構図 or 並列。 |
+| **シュール猫** | G | 猫が人間っぽいことをしている非現実な絵。皮肉・哲学的。 |
+
+### リアル猫写真の詳細スタイル
+
+| 投稿タイプ | テンプレート | 方針 |
+|-----------|------------|------|
+| 日常・つぶやき | A. 窓際・室内 | 北海道の家でまったりしてる情景 |
+| シュール・脱力 | B. 脱力コント | 飼い主の机周りやストーブ前など、生活感ある場所 |
+| 季節・時間帯 | C/D. 光と空気感 | 北海道の光。雪・緑・夕暮れ。猫はいても映り込む程度 |
+| ちょっと鋭いネタ | A or B | シンプルな室内の一角。 |
 
 ---
 
@@ -168,6 +177,92 @@ updated: 2026-02-23
 }
 ```
 
+### E. 猫Meme（共感・あるある系）
+
+テキストは最小限（英語の短いフレーズ1行が安定。日本語はツイート本文側に書く）。
+
+```json
+{
+  "image_type": "Internet meme style photo, bold minimal text overlay, high contrast",
+  "time_period_and_year": "Contemporary internet culture",
+  "mood_and_vibe": "Relatable, dry humor. The kind of image people screenshot and share. Universally understood cat frustration or sarcasm.",
+  "subject": "Orange tabby cat with an exaggerated but natural expression — deadpan stare, side-eye, or dramatic yawn. Close-up face shot.",
+  "clothing": "neutral",
+  "hair": "Orange tabby fur, expressive whiskers",
+  "face": "Exaggerated natural expression: suspicious squint, wide-eyed shock, or utterly bored half-closed eyes",
+  "accessories": "neutral",
+  "action": "A single clear reaction moment — staring at something off-camera, looking back over shoulder, or lying flat with zero motivation",
+  "location": "Simple, uncluttered background. Plain wall, floor, or single-color surface. Background should not compete with the cat or text.",
+  "lighting": "Clean, even lighting. Enough contrast for text readability. No dramatic shadows.",
+  "camera_angle_and_framing": "Tight face close-up or upper body. Cat fills 3/4 of frame. Space left at top or bottom for text overlay.",
+  "camera_equipment": "50mm, f/2.8, sharp focus on face, clean background separation",
+  "style": "High contrast, slightly saturated. Clean enough for text overlay to read clearly. Internet-native aesthetic.",
+  "text_overlay": "1 short line, max 5 words, bold sans-serif, white with black outline. Place at top or bottom with padding.",
+  "negative_prompt": "cluttered background, busy scene, multiple cats, blurry face, low contrast, cursive font, long text, Japanese text, watermark"
+}
+```
+
+**Memeテキストの例:**
+- `Monday.` （猫が死んだ目で横たわってる）
+- `no.` （何かを拒否してる顔）
+- `Working hard` （PCの前で寝落ちしてる）
+- `5 more minutes` （布団から出たくない顔）
+
+### F. 猫 vs 人間（対比・比較）
+
+分割構図で猫と人間の生活を対比させる。
+
+```json
+{
+  "image_type": "Split comparison image, clean editorial layout, two-panel composition",
+  "time_period_and_year": "Contemporary",
+  "mood_and_vibe": "Wry comparison between cat life and human life. The cat's side always looks better. Understated humor through visual contrast.",
+  "subject": "LEFT panel: orange tabby cat in a relaxed, content state. RIGHT panel: implied human stress or effort (hands on keyboard, messy desk, alarm clock — no face needed).",
+  "clothing": "neutral",
+  "hair": "Orange tabby fur on cat side",
+  "face": "Cat: serene, peaceful, smugly comfortable. Human side: no face shown, just hands or objects implying stress.",
+  "accessories": "neutral",
+  "action": "Cat: sleeping, stretching, or lounging. Human side: typing frantically, staring at screen, holding coffee desperately.",
+  "location": "Both panels in same house interior (Hokkaido house vibe). Cat side is warm and cozy. Human side is cluttered desk area.",
+  "lighting": "Cat side: warm, golden, inviting. Human side: slightly cooler, harsher monitor glow or overhead fluorescent feel.",
+  "camera_angle_and_framing": "Clean vertical split or diagonal divide. Each side clearly readable. Balanced composition.",
+  "camera_equipment": "35mm, f/4, both sides in focus, editorial clarity",
+  "style": "Clean, magazine-editorial feel. Slight color temperature difference between panels to emphasize contrast.",
+  "negative_prompt": "text, labels, arrows, human face visible, messy layout, unclear split, cartoon, illustration style"
+}
+```
+
+### G. シュール猫（猫が人間っぽいことをしている）
+
+猫が人間の行為を真似ているシュールな絵。写実ベースで違和感を狙う。
+
+```json
+{
+  "image_type": "Photorealistic surreal photography, uncanny everyday moment",
+  "time_period_and_year": "Contemporary, ordinary setting with one surreal element",
+  "mood_and_vibe": "Something is slightly off. A cat is doing a distinctly human activity with complete seriousness. Not cute — deadpan absurd.",
+  "subject": "Orange tabby cat performing a human activity with natural posture. The cat should look like it genuinely belongs in the situation.",
+  "clothing": "neutral — no costumes. The humor comes from the activity, not dress-up.",
+  "hair": "Natural orange tabby fur",
+  "face": "Completely serious, focused, professional demeanor. No smile, no cuteness.",
+  "accessories": "Only what the activity requires — reading glasses perched on nose, tiny coffee mug nearby, laptop-sized-for-cat",
+  "action": "ONE clear human activity: sitting at a desk typing, reading a newspaper, attending a video call, staring at a whiteboard, commuting on a train",
+  "location": "Realistic setting appropriate for the activity. Office desk, kitchen table, train seat. Hokkaido house interior preferred when possible.",
+  "lighting": "Naturalistic, matches the setting. Office lighting for office scene, morning light for kitchen scene.",
+  "camera_angle_and_framing": "Medium shot showing the cat and enough context to understand the activity. Cat is central subject.",
+  "camera_equipment": "50mm, f/2.8, sharp subject, slightly blurred background",
+  "style": "Photorealistic base with one surreal element (the cat doing human things). Everything else completely normal. The mundanity makes it funnier.",
+  "negative_prompt": "cartoon, illustration, anthropomorphic cat standing on two legs, cat wearing clothes, costume, exaggerated proportions, fantasy setting, multiple cats, text, logo"
+}
+```
+
+**シュール猫のシチュエーション例:**
+- PCに向かって真剣にタイピングしている猫
+- Zoom会議に参加して無表情の猫
+- 新聞を広げて朝食のテーブルについている猫
+- ホワイトボードの前でプレゼンしている猫
+- 確定申告の書類に囲まれている猫
+
 ---
 
 ## 実行方法
@@ -186,21 +281,59 @@ uv run ~/.nvm/versions/node/v24.13.0/lib/node_modules/openclaw/skills/nano-banan
 
 ## 投稿との組み合わせ
 
-1. 投稿テキストのトーンを判断（日常 / シュール / 冬 / 夏）
-2. 今の季節を確認してテンプレートを選択（A〜D）
-3. テキストに合わせてプロンプトを微調整（場所・行動・状況）
+1. 投稿テキストのトーンと狙いを判断
+2. 画像カテゴリを選択：
+
+| テキストのトーン | 画像カテゴリ | テンプレート |
+|----------------|------------|------------|
+| 日常観察・つぶやき | リアル猫写真 | A〜D（季節で選択） |
+| 脱力系・眠い系 | リアル猫写真 or 猫Meme | B or E |
+| 鋭い一言・皮肉 | シュール猫 or 猫 vs 人間 | G or F |
+| 飼い主ネタ | 猫 vs 人間 | F |
+| 共感狙い・バズ狙い | 猫Meme | E |
+
+3. テキストに合わせてプロンプトを微調整
 4. 生成 → 投稿に添付
+
+### hookCategory との対応（エンゲージメント追跡用）
+
+画像付き投稿時は `hookCategory` に画像カテゴリも含めて記録する。
+
+- `猫写真` — リアル猫写真（A〜D）
+- `猫Meme` — Meme系（E）
+- `猫vs人間` — 対比系（F）
+- `シュール猫` — シュール系（G）
 
 ---
 
 ## 品質チェック
 
+### 全カテゴリ共通
+- ホッケのペルソナと合っているか（脱力・シュール・北海道の家感）
+- 猫が茶トラであるか
+- 意図しないテキスト・ロゴ・ウォーターマークが混入していないか
+
+### リアル猫写真（A〜D）
 - **猫がフレームの2/3以上を占めているか**（最重要）
 - **背景がボケていて、間取りや家具配置が判別できないか**
-- テキスト・ロゴが混入していないか
 - 北海道・年収500万の生活感から外れていないか（豪華すぎ・小綺麗すぎ NG）
-- ホッケのペルソナと合っているか（脱力・シュール・北海道の家感）
 - 複数枚並べても間取りの矛盾を感じないか
+
+### 猫Meme（E）
+- テキストが読めるか（フォント・コントラスト）
+- テキストは英語の短フレーズか（5語以内）
+- 猫の表情がテキストの感情と合っているか
+- 背景がシンプルでテキストを邪魔していないか
+
+### 猫 vs 人間（F）
+- 分割が明確で、両パネルの内容が一目で理解できるか
+- 人間の顔が映っていないか（手・後ろ姿・物だけで表現）
+- 対比のユーモアが伝わるか
+
+### シュール猫（G）
+- 猫が衣装を着ていないか（コスプレNG。状況で語る）
+- 二足歩行になっていないか（四足のまま人間の行動をしている）
+- 「一見リアル、よく見ると猫がおかしい」のバランスか
 
 ## 間取り図の使い方
 

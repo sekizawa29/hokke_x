@@ -20,6 +20,7 @@ UNIT_PRICES = {
     "content_create": 0.010,
     "dm_read": 0.010,
     "user_interaction_create": 0.015,
+    "image_generate": 0.0,  # Gemini image gen — no per-unit X API cost; actual cost ~20 JPY/image tracked separately
 }
 
 

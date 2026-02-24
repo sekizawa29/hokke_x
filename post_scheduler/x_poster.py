@@ -52,7 +52,7 @@ class XPoster:
             print(f"認証エラー: {e}")
             return False
 
-    def _record_to_hook_performance(self, tweet_id: str, text: str, hook_category: str, tweet_type: str = "post") -> None:
+    def _record_to_hook_performance(self, tweet_id: str, text: str, hook_category: str, tweet_type: str = "post", has_image: bool = False) -> None:
         if HOOK_PERF_FILE.exists():
             with open(HOOK_PERF_FILE, 'r', encoding='utf-8') as f:
                 data = json.load(f)
@@ -64,6 +64,7 @@ class XPoster:
             "text": text,
             "hookCategory": hook_category,
             "tweet_type": tweet_type,
+            "has_image": has_image,
             "postedAt": datetime.now().astimezone().strftime('%Y-%m-%dT%H:%M:%S'),
             "engagementFetchedAt": None,
             "likes": None, "retweets": None, "replies": None, "quotes": None,
@@ -105,7 +106,7 @@ class XPoster:
         if not res.ok:
             print(f"[notify] Discord送信失敗: {res.error}")
 
-    def post_text(self, text: str, hook_category: str = "未分類") -> dict:
+    def post_text(self, text: str, hook_category: str = "未分類", has_image: bool = False) -> dict:
         try:
             response = self.api_client.create_tweet(
                 text=text,
@@ -115,7 +116,7 @@ class XPoster:
             tweet_id = response.data['id']
             url = f"https://x.com/i/web/status/{tweet_id}"
             print(f"投稿成功: {url}")
-            self._record_to_hook_performance(tweet_id, text, hook_category)
+            self._record_to_hook_performance(tweet_id, text, hook_category, has_image=has_image)
             self._notify_post_success(text=text, hook_category=hook_category, url=url)
             return {'success': True, 'tweet_id': tweet_id, 'url': url}
         except tweepy.TweepyException as e:
@@ -134,7 +135,7 @@ class XPoster:
             tweet_id = response.data['id']
             url = f"https://x.com/i/web/status/{tweet_id}"
             print(f"画像付き投稿成功: {url}")
-            self._record_to_hook_performance(tweet_id, text, hook_category)
+            self._record_to_hook_performance(tweet_id, text, hook_category, has_image=True)
             self._notify_post_success(text=text, hook_category=hook_category, url=url)
             return {'success': True, 'tweet_id': tweet_id, 'url': url}
         except (FileNotFoundError, tweepy.TweepyException) as e:

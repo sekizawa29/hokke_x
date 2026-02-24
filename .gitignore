@@ -9,3 +9,8 @@ reply_system/reply_cron.log
 analytics/x_api_usage.jsonl
 hook_performance.json
 reply_system/memory/
+*.png
+post_scheduler/auto_post.lock
+post_scheduler/engagement_sync.log
+analytics/cost_notify.log
+docs/

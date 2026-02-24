@@ -1,0 +1,170 @@
+{
+  "templates": {
+    "A": {
+      "name": "窓際・室内",
+      "category": "猫写真",
+      "prompt": {
+        "image_type": "Lifestyle photography, warm everyday moment, film grain aesthetic",
+        "time_period_and_year": "Contemporary, timeless casual feel",
+        "mood_and_vibe": "Quiet northern Japan afternoon. Slow, unhurried, slightly cold outside, warm inside.",
+        "subject": "Orange tabby cat (茶トラ), relaxed posture, not looking at camera. Close-up, cat fills most of the frame.",
+        "clothing": "neutral",
+        "hair": "Short dense fur, warm orange and cream tabby stripes",
+        "face": "Neutral expression, half-closed eyes, unbothered",
+        "accessories": "neutral",
+        "action": "Sitting or lying at the window-side hallway, looking outside, tail loosely curled",
+        "location": "Interior of an older Japanese house in Hokkaido. Background heavily blurred — only hints of double-pane window light, old wooden floor texture, faded colors.",
+        "lighting": "Soft diffused daylight through double-pane window, cool 4500K, subtle shadows on cat's fur. Northern Japan light — not harsh, slightly grey.",
+        "camera_angle_and_framing": "Close-up, low angle, cat fills 2/3 of frame. Background is soft bokeh — room details barely discernible.",
+        "camera_equipment": "85mm portrait lens, f/1.4, shallow depth of field, heavy background bokeh, slight vignette, fine grain",
+        "style": "Muted cool tones, lived-in domestic feel suggested through light and texture only. Not Instagram-pretty.",
+        "negative_prompt": "wide shot, full room visible, furniture in focus, posed, looking at camera, luxury interior, new furniture, bright colors, text, logo, studio lighting"
+      }
+    },
+    "B": {
+      "name": "脱力コント",
+      "category": "猫写真",
+      "prompt": {
+        "image_type": "Candid photography, slightly surreal everyday moment",
+        "time_period_and_year": "Contemporary, ordinary weekday feel",
+        "mood_and_vibe": "Dry humor. The cat is clearly unimpressed. Something mundane is happening but the cat doesn't care.",
+        "subject": "Orange tabby cat, completely unbothered expression. Close-up portrait, cat is the dominant subject.",
+        "clothing": "neutral",
+        "hair": "Short tabby fur, orange and cream",
+        "face": "Deadpan, thousand-yard stare, zero emotion",
+        "accessories": "neutral",
+        "action": "Sitting next to tangled cables, or near an oil heater, chin resting on paws",
+        "location": "Hokkaido house interior. Background out of focus — just hints of cluttered desk, cables, a coffee mug, warm heater glow. All blurred.",
+        "lighting": "Neutral indoor lighting, overcast daylight from window, slightly flat, focused on cat's face",
+        "camera_angle_and_framing": "Eye-level close-up with cat, cat fills 2/3 of frame, background is blurred bokeh",
+        "camera_equipment": "85mm, f/1.8, shallow depth of field, background bokeh",
+        "style": "Flat, documentary. Slightly desaturated. Domestic mess hinted at through blurred background only.",
+        "negative_prompt": "wide shot, full room visible, furniture layout visible, cute poses, cartoon, exaggerated reactions, luxury items, clean desk, bright colors, dramatic lighting, text"
+      }
+    },
+    "C": {
+      "name": "北海道の光と季節感（冬）",
+      "category": "猫写真",
+      "seasons": ["winter"],
+      "prompt": {
+        "image_type": "Atmospheric close-up photography, mood-driven",
+        "time_period_and_year": "Timeless, Hokkaido seasonal moment",
+        "mood_and_vibe": "The particular quiet of a Hokkaido winter afternoon. Time moves slowly. Cold outside, warm inside.",
+        "subject": "Orange tabby cat close-up, fur lit by cold window light, contemplative",
+        "clothing": "neutral",
+        "hair": "Fur catching cold window light, individual hairs visible",
+        "face": "Calm, slightly squinting, looking toward window",
+        "accessories": "neutral",
+        "action": "Sitting at window, face and upper body close-up, faint condensation on glass in blurred background",
+        "location": "Hokkaido house window. Background is heavily bokeh — just cold white light from window, vague snow outside, warm amber tones from room interior.",
+        "lighting": "Flat cold daylight from overcast Hokkaido winter sky on cat's face. Cool 5000K. Faint warm glow from behind (oil heater).",
+        "camera_angle_and_framing": "Close-up portrait of cat against window light. Cat fills 2/3 of frame. Window is blurred bright background.",
+        "camera_equipment": "85mm, f/1.4, heavy bokeh, film look",
+        "style": "Cool blues from window, warm amber from room. Contrast visible on cat's fur. Film grain.",
+        "negative_prompt": "wide shot, full room visible, garden detail in focus, busy composition, luxury interior, southern Japan scenery, cherry blossoms, text, logo"
+      }
+    },
+    "D": {
+      "name": "夏（北海道の短い夏）",
+      "category": "猫写真",
+      "seasons": ["summer"],
+      "prompt": {
+        "image_type": "Candid lifestyle close-up photography, summer mood",
+        "time_period_and_year": "Contemporary Hokkaido summer, brief and precious",
+        "mood_and_vibe": "Unusually warm day for Hokkaido. The cat is mildly bothered by the heat but managing.",
+        "subject": "Orange tabby cat close-up, slightly sprawled, not looking at camera",
+        "clothing": "neutral",
+        "hair": "Short tabby fur looking slightly ruffled, warm light on fur",
+        "face": "Mild discomfort, narrowed eyes, close-up expression",
+        "accessories": "neutral",
+        "action": "Lying flat, chin on floor, face close to camera. Breeze from open window suggested by fur movement.",
+        "location": "Hokkaido house interior, summer. Background blurred — just bright open window light, hint of green outside, maybe edge of electric fan. All soft bokeh.",
+        "lighting": "Bright summer daylight, warm 5500K, natural shadows on cat's face",
+        "camera_angle_and_framing": "Very low angle, face-level with cat on floor, close-up. Cat fills 2/3 of frame. Background is bright bokeh.",
+        "camera_equipment": "85mm, f/1.4, shallow depth of field, slight overexposure",
+        "style": "Warm but not glamorous. Hokkaido summer light on cat's fur is the focus.",
+        "negative_prompt": "wide shot, full room visible, AC unit, luxury interior, posed cat, cute expression, text, logo"
+      }
+    },
+    "E": {
+      "name": "猫Meme",
+      "category": "猫Meme",
+      "prompt": {
+        "image_type": "Internet meme style photo, bold minimal text overlay, high contrast",
+        "time_period_and_year": "Contemporary internet culture",
+        "mood_and_vibe": "Relatable, dry humor. The kind of image people screenshot and share. Universally understood cat frustration or sarcasm.",
+        "subject": "Orange tabby cat with an exaggerated but natural expression — deadpan stare, side-eye, or dramatic yawn. Close-up face shot.",
+        "clothing": "neutral",
+        "hair": "Orange tabby fur, expressive whiskers",
+        "face": "Exaggerated natural expression: suspicious squint, wide-eyed shock, or utterly bored half-closed eyes",
+        "accessories": "neutral",
+        "action": "A single clear reaction moment — staring at something off-camera, looking back over shoulder, or lying flat with zero motivation",
+        "location": "Simple, uncluttered background. Plain wall, floor, or single-color surface. Background should not compete with the cat or text.",
+        "lighting": "Clean, even lighting. Enough contrast for text readability. No dramatic shadows.",
+        "camera_angle_and_framing": "Tight face close-up or upper body. Cat fills 3/4 of frame. Space left at top or bottom for text overlay.",
+        "camera_equipment": "50mm, f/2.8, sharp focus on face, clean background separation",
+        "style": "High contrast, slightly saturated. Clean enough for text overlay to read clearly. Internet-native aesthetic.",
+        "text_overlay": "1 short line, max 5 words, bold sans-serif, white with black outline. Place at top or bottom with padding.",
+        "negative_prompt": "cluttered background, busy scene, multiple cats, blurry face, low contrast, cursive font, long text, Japanese text, watermark"
+      }
+    },
+    "F": {
+      "name": "猫 vs 人間",
+      "category": "猫vs人間",
+      "prompt": {
+        "image_type": "Split comparison image, clean editorial layout, two-panel composition",
+        "time_period_and_year": "Contemporary",
+        "mood_and_vibe": "Wry comparison between cat life and human life. The cat's side always looks better. Understated humor through visual contrast.",
+        "subject": "LEFT panel: orange tabby cat in a relaxed, content state. RIGHT panel: implied human stress or effort (hands on keyboard, messy desk, alarm clock — no face needed).",
+        "clothing": "neutral",
+        "hair": "Orange tabby fur on cat side",
+        "face": "Cat: serene, peaceful, smugly comfortable. Human side: no face shown, just hands or objects implying stress.",
+        "accessories": "neutral",
+        "action": "Cat: sleeping, stretching, or lounging. Human side: typing frantically, staring at screen, holding coffee desperately.",
+        "location": "Both panels in same house interior (Hokkaido house vibe). Cat side is warm and cozy. Human side is cluttered desk area.",
+        "lighting": "Cat side: warm, golden, inviting. Human side: slightly cooler, harsher monitor glow or overhead fluorescent feel.",
+        "camera_angle_and_framing": "Clean vertical split or diagonal divide. Each side clearly readable. Balanced composition.",
+        "camera_equipment": "35mm, f/4, both sides in focus, editorial clarity",
+        "style": "Clean, magazine-editorial feel. Slight color temperature difference between panels to emphasize contrast.",
+        "negative_prompt": "text, labels, arrows, human face visible, messy layout, unclear split, cartoon, illustration style"
+      }
+    },
+    "G": {
+      "name": "シュール猫",
+      "category": "シュール猫",
+      "prompt": {
+        "image_type": "Photorealistic surreal photography, uncanny everyday moment",
+        "time_period_and_year": "Contemporary, ordinary setting with one surreal element",
+        "mood_and_vibe": "Something is slightly off. A cat is doing a distinctly human activity with complete seriousness. Not cute — deadpan absurd.",
+        "subject": "Orange tabby cat performing a human activity with natural posture. The cat should look like it genuinely belongs in the situation.",
+        "clothing": "neutral — no costumes. The humor comes from the activity, not dress-up.",
+        "hair": "Natural orange tabby fur",
+        "face": "Completely serious, focused, professional demeanor. No smile, no cuteness.",
+        "accessories": "Only what the activity requires — reading glasses perched on nose, tiny coffee mug nearby, laptop-sized-for-cat",
+        "action": "ONE clear human activity: sitting at a desk typing, reading a newspaper, attending a video call, staring at a whiteboard, commuting on a train",
+        "location": "Realistic setting appropriate for the activity. Office desk, kitchen table, train seat. Hokkaido house interior preferred when possible.",
+        "lighting": "Naturalistic, matches the setting. Office lighting for office scene, morning light for kitchen scene.",
+        "camera_angle_and_framing": "Medium shot showing the cat and enough context to understand the activity. Cat is central subject.",
+        "camera_equipment": "50mm, f/2.8, sharp subject, slightly blurred background",
+        "style": "Photorealistic base with one surreal element (the cat doing human things). Everything else completely normal. The mundanity makes it funnier.",
+        "negative_prompt": "cartoon, illustration, anthropomorphic cat standing on two legs, cat wearing clothes, costume, exaggerated proportions, fantasy setting, multiple cats, text, logo"
+      }
+    }
+  },
+  "season_map": {
+    "1": "winter", "2": "winter", "3": "winter",
+    "4": "spring", "5": "spring",
+    "6": "summer", "7": "summer", "8": "summer",
+    "9": "autumn", "10": "autumn",
+    "11": "winter", "12": "winter"
+  },
+  "image_category_to_hook_category": {
+    "A": "猫写真",
+    "B": "猫写真",
+    "C": "猫写真",
+    "D": "猫写真",
+    "E": "猫Meme",
+    "F": "猫vs人間",
+    "G": "シュール猫"
+  }
+}
