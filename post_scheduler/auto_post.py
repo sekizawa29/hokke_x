@@ -317,7 +317,8 @@ def _build_timing_context(now: datetime, gate_info: dict, image_eligible: bool, 
     slot_times = []
     remainder = now.minute % interval
     t = now + timedelta(minutes=interval - remainder if remainder else interval)
-    while t.hour <= 23:
+    today = now.date()
+    while t.date() == today and t.hour <= 23:
         slot_times.append(t.strftime("%H:%M"))
         t += timedelta(minutes=interval)
     if slot_times:
