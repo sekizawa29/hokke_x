@@ -221,3 +221,4 @@ Must Fix 1件のみ。Nice to Have/Infoは全て前回と同じ指摘の繰り�
 [2026-02-26 10:37:39] [discord] Discord通知失敗: 'utf-8' codec can't decode bytes in position 798-799: unexpected end of data
 [2026-02-26 11:05:33] SKIP: 別プロセスが20分以上占有。ロック強制解放を検討
 [2026-02-26 11:20:33] SKIP: 別プロセスが20分以上占有。ロック強制解放を検討
+[2026-02-26 11:35:30] SKIP: 別プロセスが20分以上占有。ロック強制解放を検討

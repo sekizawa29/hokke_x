@@ -59,7 +59,14 @@
       "Bash(powershell.exe -Command \"Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.Screen]::PrimaryScreen.Bounds\" 2>/dev/null)",
       "Bash(powershell.exe -Command \"Get-Process | Where-Object { \\\\$_.ProcessName -match 'chrome|firefox|msedge' } | Select-Object ProcessName, Id -First 5\" 2>/dev/null)",
       "Bash(powershell.exe -Command \"Get-ItemProperty 'HKCU:\\\\Software\\\\Microsoft\\\\Windows\\\\Shell\\\\Associations\\\\UrlAssociations\\\\https\\\\UserChoice' | Select-Object -ExpandProperty ProgId\" 2>/dev/null)",
-      "Bash(git add post_scheduler/check_engagement.py post_scheduler/strategy.json post_scheduler/x_api_client.py post_scheduler/x_poster.py reply_system/config.json reply_system/reply_log.json reply_system/reply_strategy.json x_cli.py .claude/settings.local.json)"
+      "Bash(git add post_scheduler/check_engagement.py post_scheduler/strategy.json post_scheduler/x_api_client.py post_scheduler/x_poster.py reply_system/config.json reply_system/reply_log.json reply_system/reply_strategy.json x_cli.py .claude/settings.local.json)",
+      "Bash(git add dashboard/ reply_system/browser_automation/ reply_system/generate_reply_dashboard.py reply_system/mention_reply.py reply_system/quote_config.json reply_system/quote_engine.py reply_system/quote_state.json scripts/account_brainstorm.py scripts/brainstorm.log scripts/brainstorm_persona/ scripts/brainstorm_rounds/ scripts/brainstorm_state.json)",
+      "Bash(git commit -m \"$\\(cat <<'EOF'\nchore: リファクタリング前のスナップショット\n\nブラウザ自動化リプライ、ダッシュボード生成、メンションリプライ、\n引用エンジン等の追加・変更を含む。次コミットで旧API方式の整理を行う。\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(cd /home/sekiz/pjt/hokke_x/reply_system && rm -f config.json target_accounts.json fetch_candidates.py post_claude_reply.py quote_engine.py quote_state.json mention_reply.py reply_cron.log)",
+      "Bash(crontab -l 2>/dev/null | grep -v '\\\\[disabled:api-reply-restriction\\\\]' | crontab -)",
+      "Bash(git -C /home/sekiz/pjt/hokke_x status)",
+      "Bash(cd /home/sekiz/pjt/hokke_x && git add .claude/skills/hokke-reply-auto/ .claude/skills/hokke-reply-claude/ .claude/skills/hokke-reply/ SYSTEM.md docs/REPLY_SYSTEM.md reply_system/browser_automation/orchestrator.py reply_system/config.json reply_system/fetch_candidates.py reply_system/generate_reply_dashboard.py reply_system/mention_reply.py reply_system/post_claude_reply.py reply_system/quote_config.json reply_system/quote_engine.py reply_system/quote_state.json reply_system/reply_engine.py reply_system/target_accounts.json reply_system/search_config.json x_cli.py)",
+      "Bash(cd /home/sekiz/pjt/hokke_x && git add -u && git add reply_system/search_config.json && git add -f docs/REPLY_SYSTEM.md)"
     ]
   }
 }

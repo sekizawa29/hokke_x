@@ -16,9 +16,9 @@
 
 ### 設計原則
 
-1. ホッケの声を崩さない  
-2. 投稿・リプライの実行を自動化して運用負荷を下げる  
-3. コストと成果を可視化する  
+1. ホッケの声を崩さない
+2. 投稿・リプライの実行を自動化して運用負荷を下げる
+3. コストと成果を可視化する
 4. 分析結果を次の運用に反映する
 
 ---
@@ -31,19 +31,26 @@
 ├── PERSONA.md
 ├── STRATEGY.md
 ├── STRATEGY_FINAL.md
-├── x_cli.py                        # 投稿/リプライ共通入口
+├── x_cli.py                        # 投稿共通入口
 ├── post_scheduler/
-│   ├── auto_post.py                # リアルタイム自動投稿（確率ゲート）
+│   ├── auto_post.py                # リアルタイム自動投稿
 │   ├── auto_post_state.json        # 日次目標状態（git管理外）
 │   ├── auto_post.log               # 投稿ログ
 │   ├── x_poster.py                 # 即時投稿実行
 │   ├── x_api_client.py             # X API共通クライアント
 │   └── cost_logger.py              # API課金イベント記録
 ├── reply_system/
-│   ├── reply_engine.py
-│   ├── fetch_candidates.py
-│   ├── post_claude_reply.py
-│   └── reply_log.json
+│   ├── reply_engine.py             # 検索・判定・生成ライブラリ
+│   ├── generate_reply_dashboard.py # 候補生成（cron用）
+│   ├── search_config.json          # 検索キーワード設定
+│   ├── reply_strategy.json         # リプライ戦略
+│   ├── ng_keywords.json            # NGキーワード
+│   ├── reply_log.json              # リプライログ（重複排除用）
+│   └── browser_automation/
+│       ├── orchestrator.py         # ブラウザ自動化オーケストレーター
+│       ├── win_autogui.py          # Windows側GUI自動化
+│       ├── config.json             # タイミング・件数設定
+│       └── session_log.json        # セッションログ
 ├── notifications/
 │   └── discord_notifier.py         # Discord通知共通モジュール
 ├── analytics/
@@ -58,7 +65,7 @@
 
 ### 1. リアルタイム投稿
 
-**スキル:** `hokke-post`  
+**スキル:** `hokke-post`
 **役割:** 投稿文を生成し、`x_cli.py` 経由で即時投稿
 
 **基本コマンド:**
@@ -84,15 +91,22 @@ python3 post_scheduler/auto_post.py \
   --run-interval-minutes 30
 ```
 
-### 3. リプライ運用
+### 3. リプライ運用（ブラウザ自動化方式）
 
-**スキル:** `hokke-reply`, `hokke-reply-auto`, `hokke-reply-claude`
+**スキル:** `hokke-reply-browser`
+
+**フロー:**
+1. `generate_reply_dashboard.py` で候補を事前生成（cron推奨）
+2. `orchestrator.py` でブラウザ自動化リプライを実行（手動）
 
 ```bash
 cd ~/pjt/hokke_x
-python3 x_cli.py reply discover
-python3 x_cli.py reply run
-python3 x_cli.py reply status
+# 候補生成
+python3 reply_system/generate_reply_dashboard.py
+
+# ブラウザ自動化実行
+python3 reply_system/browser_automation/orchestrator.py
+python3 reply_system/browser_automation/orchestrator.py --dry-run
 ```
 
 ### 4. 日次コスト通知（Discord）
@@ -120,13 +134,13 @@ python3 analytics/daily_cost_report.py --yesterday --notify-discord
 6. 後日エンゲージメント分析
 ```
 
-### リプライ
+### リプライ（ブラウザ自動化）
 
 ```text
-1. discover で候補収集
-2. reply で本文生成/投稿
-3. reply_log.json に記録
-4. 必要に応じてDiscord報告
+1. generate_reply_dashboard.py で候補生成 + reply_candidates.json に蓄積
+2. orchestrator.py でブラウザ操作リプライ実行
+3. session_log.json / reply_log.json に記録
+4. reply_candidates.json から処理済みを除去
 ```
 
 ---
@@ -142,7 +156,7 @@ python3 analytics/daily_cost_report.py --yesterday --notify-discord
 
 ### リプライ
 
-- 日次上限を守る
+- 1セッション最大10件、90〜180秒間隔
 - 政治・宗教・炎上系はスキップ
 - 攻撃的にならない
 
@@ -190,4 +204,4 @@ python3 analytics/daily_cost_report.py --yesterday --notify-discord
 
 ---
 
-*最終更新: 2026-02-20*
+*最終更新: 2026-02-26*

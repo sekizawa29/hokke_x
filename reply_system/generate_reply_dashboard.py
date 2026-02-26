@@ -24,14 +24,14 @@ sys.path.insert(0, str(PROJECT_DIR / "post_scheduler"))
 from x_api_client import XApiClient
 from reply_engine import ReplyEngine
 
-QUOTE_CONFIG = SCRIPT_DIR / "quote_config.json"
+SEARCH_CONFIG = SCRIPT_DIR / "search_config.json"
 OUTPUT_DIR = PROJECT_DIR / "dashboard"
 OUTPUT_FILE = OUTPUT_DIR / "reply_candidates.html"
 
 
 def generate_candidates(max_queries: int = 3, per_query: int = 10) -> list[dict]:
     """キーワード検索→フィルタ→リプライ生成"""
-    config = json.loads(QUOTE_CONFIG.read_text(encoding="utf-8"))
+    config = json.loads(SEARCH_CONFIG.read_text(encoding="utf-8"))
     engine = ReplyEngine()
 
     keywords = config.get("search_keywords", {})

@@ -23,7 +23,10 @@ PROJECT_DIR = REPLY_SYSTEM_DIR.parent
 CANDIDATES_FILE = PROJECT_DIR / "dashboard" / "reply_candidates.json"
 CONFIG_FILE = SCRIPT_DIR / "config.json"
 LOG_FILE = SCRIPT_DIR / "session_log.json"
-REPLY_LOG_FILE = REPLY_SYSTEM_DIR / "reply_log.json"  # reply_engine.py のログ
+# reply_log.json スキーマ契約:
+#   各エントリは {"target_tweet_id": str, "status": "posted"|"dry_run"|...} を持つ。
+#   重複排除は status=="posted" かつ target_tweet_id で判定する。
+REPLY_LOG_FILE = REPLY_SYSTEM_DIR / "reply_log.json"
 
 # win_autogui.py の Windows パスを取得
 WIN_AUTOGUI_WSL = SCRIPT_DIR / "win_autogui.py"
