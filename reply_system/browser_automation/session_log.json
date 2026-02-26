@@ -1,0 +1,116 @@
+[
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2026484927261274498",
+    "status": "skipped",
+    "timestamp": "2026-02-25T22:35:28.421088"
+  },
+  {
+    "username": "aiiro_san_",
+    "tweet_id": "2026330348767105210",
+    "reply_text": "うちの飼い主も在宅だけど、膝の上が定位置になるだけだよ。仕事してるのかしてないのか知らんけど",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T22:35:52.560944",
+    "status": "success"
+  },
+  {
+    "username": "hatone",
+    "tweet_id": "2026192129853366521",
+    "reply_text": "合ってるよ。声のトーン変わる瞬間、全部聞こえてる",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T22:37:11.511863",
+    "status": "success"
+  },
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2026484927261274498",
+    "reply_text": "うちも飼い主の椅子よく使う。あれ猫用でしょ",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-25T22:55:41.366491",
+    "status": "failed"
+  },
+  {
+    "username": "elotic7",
+    "tweet_id": "2026165841067422089",
+    "reply_text": "猫が隣に来たなら寝ていいってこと。正式な許可出てる",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T22:56:48.742953",
+    "status": "success"
+  },
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2026122541962531055",
+    "reply_text": "いい椅子を選んだ時点で猫に献上したのと同じ。諦めて",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T22:57:42.184903",
+    "status": "success"
+  },
+  {
+    "username": "neko_eiji",
+    "tweet_id": "2026069887479918811",
+    "reply_text": "朝8時にまったりしてるの、猫は毎日やってる。人間がやっと追いついただけ",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-25T22:58:25.628880",
+    "status": "failed"
+  },
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2025760155216789820",
+    "reply_text": "先に座ったほうのもの。猫界では常識",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T22:59:39.284530",
+    "status": "success"
+  },
+  {
+    "username": "rinka7380",
+    "tweet_id": "2026619321125048777",
+    "reply_text": "ホタテもいいけど、ホッケも忘れないでほしい",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-25T23:12:44.960440",
+    "status": "failed"
+  },
+  {
+    "username": "gansu7070",
+    "tweet_id": "2026544950268334253",
+    "reply_text": "刺身3種で770円。僕も連れてってほしい、魚だけでいいから",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T23:13:33.887970",
+    "status": "success"
+  },
+  {
+    "username": "Josephinevge",
+    "tweet_id": "2026530137387446719",
+    "reply_text": "500円の刺身…。猫的にはそこだけ聞き捨てならない情報だった",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T23:14:37.602030",
+    "status": "success"
+  },
+  {
+    "username": "kumatakach",
+    "tweet_id": "2026500856187961748",
+    "reply_text": "刺身が安くておいしい店の情報、猫として聞き逃せない",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T23:15:43.410558",
+    "status": "success"
+  },
+  {
+    "username": "uochu_hisashi",
+    "tweet_id": "2026483382306353357",
+    "reply_text": "ホッケ入ってる？…いや別にいいけど",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-25T23:16:56.301555",
+    "status": "success"
+  }
+]

@@ -94,6 +94,7 @@ class XApiClient:
         text: str,
         media_ids: Optional[list[int]] = None,
         in_reply_to_tweet_id: Optional[str] = None,
+        quote_tweet_id: Optional[str] = None,
         context: str = "",
         metadata: Optional[dict] = None,
     ) -> Any:
@@ -105,12 +106,16 @@ class XApiClient:
             kwargs["media_ids"] = media_ids
         if in_reply_to_tweet_id:
             kwargs["in_reply_to_tweet_id"] = in_reply_to_tweet_id
+        if quote_tweet_id:
+            kwargs["quote_tweet_id"] = quote_tweet_id
 
         response = self.client.create_tweet(**kwargs)
 
         endpoint = "POST /2/tweets"
         if in_reply_to_tweet_id:
             endpoint = "POST /2/tweets (reply)"
+        elif quote_tweet_id:
+            endpoint = "POST /2/tweets (quote)"
         elif media_ids:
             endpoint = "POST /2/tweets (with media)"
 
@@ -119,6 +124,8 @@ class XApiClient:
             event_meta.update(metadata)
         if in_reply_to_tweet_id:
             event_meta["reply_to_tweet_id"] = str(in_reply_to_tweet_id)
+        if quote_tweet_id:
+            event_meta["quote_tweet_id"] = str(quote_tweet_id)
 
         log_api_usage(
             "content_create",
@@ -194,6 +201,41 @@ class XApiClient:
                 "GET /2/tweets/search/recent (includes.users)",
                 context="x_api_client.search_recent_tweets",
                 metadata={"query": query, "max_results": params["max_results"]},
+            )
+        return data
+
+    def search_mentions(self, username: str, since_id: str | None = None, max_results: int = 10) -> dict:
+        """@username のメンションを検索（since_id 対応）"""
+        url = "https://api.x.com/2/tweets/search/recent"
+        query = f"@{username} -from:{username}"
+        params = {
+            "query": query,
+            "max_results": max(10, min(max_results, 100)),
+            "tweet.fields": "author_id,created_at,public_metrics,conversation_id",
+            "expansions": "author_id",
+            "user.fields": "username,public_metrics",
+        }
+        if since_id:
+            params["since_id"] = since_id
+        resp = requests.get(url, headers=self._bearer_headers(), params=params)
+        resp.raise_for_status()
+        data = resp.json()
+        tweets = data.get("data", []) or []
+        users = data.get("includes", {}).get("users", []) or []
+        log_api_usage(
+            "post_read",
+            len(tweets),
+            "GET /2/tweets/search/recent",
+            context="x_api_client.search_mentions",
+            metadata={"query": query},
+        )
+        if users:
+            log_api_usage(
+                "user_read",
+                len(users),
+                "GET /2/tweets/search/recent (includes.users)",
+                context="x_api_client.search_mentions",
+                metadata={"query": query},
             )
         return data
 

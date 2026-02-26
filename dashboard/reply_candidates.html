@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ホッケ リプライ候補 (2026-02-25 23:11)</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #15202b; color: #e7e9ea;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 16px; max-width: 680px; margin: 0 auto;
+}
+h1 {
+  font-size: 20px; padding: 12px 0; border-bottom: 1px solid #38444d;
+  margin-bottom: 16px;
+}
+.meta { color: #8899a6; font-size: 13px; margin-bottom: 16px; }
+.card {
+  background: #192734; border: 1px solid #38444d; border-radius: 12px;
+  padding: 16px; margin-bottom: 12px;
+}
+.card.done { opacity: 0.4; }
+.card-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 8px;
+}
+.username { color: #1d9bf0; font-weight: bold; font-size: 15px; }
+.username a { color: inherit; text-decoration: none; }
+.username a:hover { text-decoration: underline; }
+.badge {
+  background: #253341; color: #8899a6; font-size: 11px;
+  padding: 2px 8px; border-radius: 10px;
+}
+.tweet-text {
+  font-size: 14px; line-height: 1.5; margin-bottom: 12px;
+  white-space: pre-wrap; word-break: break-word;
+}
+.reply-label { color: #8899a6; font-size: 12px; margin-bottom: 4px; }
+textarea {
+  width: 100%; background: #253341; color: #e7e9ea; border: 1px solid #38444d;
+  border-radius: 8px; padding: 10px; font-size: 14px; resize: vertical;
+  min-height: 60px; font-family: inherit; line-height: 1.4;
+}
+textarea:focus { outline: none; border-color: #1d9bf0; }
+.actions {
+  display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;
+  align-items: center;
+}
+.btn {
+  padding: 8px 16px; border-radius: 20px; border: none; cursor: pointer;
+  font-size: 14px; font-weight: bold; transition: opacity 0.2s;
+}
+.btn:hover { opacity: 0.85; }
+.btn-reply { background: #1d9bf0; color: #fff; }
+.btn-quote { background: #00ba7c; color: #fff; }
+.btn-skip {
+  background: transparent; color: #8899a6; border: 1px solid #38444d;
+}
+.toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+  background: #1d9bf0; color: #fff; padding: 10px 20px; border-radius: 8px;
+  font-size: 14px; display: none; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+.char-count { color: #8899a6; font-size: 12px; margin-left: auto; }
+.empty {
+  text-align: center; padding: 40px; color: #8899a6;
+}
+</style>
+</head>
+<body>
+
+<h1>🐟 ホッケ リプライ候補</h1>
+<div class="meta">
+  生成: 2026-02-25 23:11 ／ 10件の候補
+</div>
+
+<div id="cards"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const candidates = [{"tweet_id": "2026619321125048777", "username": "rinka7380", "display_name": "🍎わがまま☆フェアリー りんか🍎", "followers": 187, "tweet_text": "ホタテはおいしい！ホタテの刺身が食べたい", "reply_text": "ホタテもいいけど、ホッケも忘れないでほしい", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026544950268334253", "username": "gansu7070", "display_name": "ファビアンを応援する人", "followers": 273, "tweet_text": "#広島ランチ　西区のある定食屋（内緒）毎週水曜は刺身定食🐟この日はびんちょう、マグロ、炙り3種。ビーフシチュー、里芋煮付け、冷や奴など小鉢も多い。全て手作りでおいしい🤤🐟のあらから出汁とったみそ汁は絶品。これでなんと770円‼️もうびっくりΣ（￣□￣）ありがとうございました🙇 https://t.co/eCEceCaNLe", "reply_text": "刺身3種で770円。僕も連れてってほしい、魚だけでいいから", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026530137387446719", "username": "Josephinevge", "display_name": "あんちゃん", "followers": 12, "tweet_text": "梅田の黒門市場で鮮魚やん！まさかの500円でおいしい刺身買えたわ！なんやこのコスパ‼️えらいこっちゃ😂", "reply_text": "500円の刺身…。猫的にはそこだけ聞き捨てならない情報だった", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026500856187961748", "username": "kumatakach", "display_name": "teamクマタカchannel", "followers": 6178, "tweet_text": "酒解へ🍻\nお刺身がおいしい安い☺\n\nツインテールが作るランチの動画↓\n#酒解\n#大阪\n#なんば\n#裏なんば\n#サカトケ\n#刺身 https://t.co/1nRYoy8dQ8", "reply_text": "刺身が安くておいしい店の情報、猫として聞き逃せない", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026483382306353357", "username": "uochu_hisashi", "display_name": "魚忠熱田店鳥居", "followers": 1666, "tweet_text": "魚忠熱田店\n本日のおいしい たのしい 厳選刺身盛り合わせ！\n🐟\n\n税込1650円 https://t.co/L3sRYygzlj", "reply_text": "ホッケ入ってる？…いや別にいいけど", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026285152490639589", "username": "yuri_summers", "display_name": "ゆりなあと愉快な船", "followers": 275, "tweet_text": "今夜はふくらぎのお刺身と、大根のお味噌汁。\nアボカドはごまとにんにく醤油で和えてみたら、これがすごくおいしい☺️\n冷凍の揚げナスは、温めてポン酢でさっぱり。\nいつもよりおかず多めでがんばりました。\n#ゆりメシ", "reply_text": "ふくらぎのとこだけ3回読んだ。あとは関係ない。猫だから。", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026280219708113284", "username": "saitamatossi", "display_name": "さいたまのトッシー(社会人野球盛り上げ隊)", "followers": 250, "tweet_text": "我が地元東松山市には鯛茶漬けのおいしいお店があります。\nまずは鯛刺身を食べて、そのあと、だしをかけたら、くー‼️です。\n鯛茶漬け大好き‼️ https://t.co/BW5V6dxPXr", "reply_text": "鯛の刺身からの出汁茶漬けって完璧な流れじゃん。魚を二度楽しむの、猫として尊敬する", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026250205314887755", "username": "tamura_hayato", "display_name": "田村勇人・弁護士・コメンテーター", "followers": 1867, "tweet_text": "浜松山本亭、浜松観光大使の渡辺さんに連れてっていただいたけど、すっぽんもカワハギも刺身も全部おいしいし安い。お勧め https://t.co/1jy0D9p4Rv", "reply_text": "刺身にカワハギ。猫が選んでも同じメニューになる", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026227909472719122", "username": "nagasakiit114", "display_name": "海鮮市場 長崎港☆長崎市出島ワーフ で 海鮮丼！年中無休！　ツイッター１６年目♪", "followers": 16167, "tweet_text": "「つぶやき」♫　あと 5\n\n出島の店の中で　マグロとめぐりあえた\nツイートね♪　みつけたお店が　港のそばにあるなんて\n\nイクラ✰ブリ✰丼　イクラ✰ブリ✰丼\n\nあなたが思うより多く\nおいしい丼なら　ください　\n\n欲しいのは　刺身（＾０＾）うまうま♪ https://t.co/Jz3sk6ohzA", "reply_text": "マグロもブリもイクラも出てくるのに僕に一切まわってこない気配がする", "category": "ごはん・魚", "query": "刺身 おいしい"}, {"tweet_id": "2026225460922012024", "username": "IzutaniM", "display_name": "小原庄助", "followers": 2455, "tweet_text": "居酒屋フェリー、＼(^-^)／\nこの落石の生タコ刺身めっちゃおいしい‼️\nなんか仕入れ数が少ないので、わいが食べてしまったこともーーーw\n#新日本海フェリー\n#かぐらスキー場 https://t.co/XulAlfI8iE", "reply_text": "フェリーで生タコ……僕も乗りたい。についてはノーコメント", "category": "ごはん・魚", "query": "刺身 おいしい"}];
+
+const cardsEl = document.getElementById('cards');
+const toastEl = document.getElementById('toast');
+
+if (candidates.length === 0) {
+  cardsEl.innerHTML = '<div class="empty">候補が見つかりませんでした</div>';
+}
+
+candidates.forEach((c, i) => {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.id = 'card-' + i;
+  card.innerHTML = `
+    <div class="card-header">
+      <span class="username">
+        <a href="https://x.com/${c.username}" target="_blank" rel="noopener">
+          @${c.username}
+        </a>
+      </span>
+      <span class="badge">${c.category}</span>
+    </div>
+    <div class="tweet-text">${escapeHtml(c.tweet_text)}</div>
+    <div class="reply-label">生成リプライ:</div>
+    <textarea id="reply-${i}">${escapeHtml(c.reply_text)}</textarea>
+    <div class="actions">
+      <button class="btn btn-reply" onclick="doReply(${i})">リプライする</button>
+      <button class="btn btn-quote" onclick="doQuote(${i})">引用する</button>
+      <button class="btn btn-skip" onclick="doSkip(${i})">スキップ</button>
+      <span class="char-count" id="count-${i}">${c.reply_text.length}文字</span>
+    </div>
+  `;
+  cardsEl.appendChild(card);
+
+  // 文字数カウント
+  document.getElementById('reply-' + i).addEventListener('input', (e) => {
+    document.getElementById('count-' + i).textContent = e.target.value.length + '文字';
+  });
+});
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function getReplyText(idx) {
+  return document.getElementById('reply-' + idx).value.trim();
+}
+
+function showToast(msg) {
+  toastEl.textContent = msg;
+  toastEl.style.display = 'block';
+  setTimeout(() => { toastEl.style.display = 'none'; }, 2500);
+}
+
+function doReply(idx) {
+  const c = candidates[idx];
+  const text = getReplyText(idx);
+  if (!text) return;
+
+  const intentUrl = 'https://x.com/intent/tweet?in_reply_to=' + c.tweet_id + '&text=' + encodeURIComponent(text);
+  window.open(intentUrl, '_blank');
+
+  document.getElementById('card-' + idx).classList.add('done');
+}
+
+function doQuote(idx) {
+  const c = candidates[idx];
+  const text = getReplyText(idx);
+  if (!text) return;
+
+  const tweetUrl = 'https://x.com/' + c.username + '/status/' + c.tweet_id;
+  const intentUrl = 'https://x.com/intent/tweet?text=' + encodeURIComponent(text + ' ' + tweetUrl);
+  window.open(intentUrl, '_blank');
+
+  document.getElementById('card-' + idx).classList.add('done');
+}
+
+function doSkip(idx) {
+  document.getElementById('card-' + idx).classList.add('done');
+}
+</script>
+</body>
+</html>

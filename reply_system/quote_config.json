@@ -1,0 +1,61 @@
+{
+  "daily_quote_limit": 2,
+  "session_quote_limit": 1,
+  "quote_interval_seconds": 300,
+  "search_tweets_per_query": 10,
+  "search_queries_per_run": 2,
+  "min_followers_to_target": 50,
+  "max_followers_to_target": 50000,
+  "cooldown_days_per_user": 7,
+  "max_consecutive_skips": 5,
+  "max_consecutive_failures": 3,
+  "active_hours_jst": {
+    "start": 9,
+    "end": 22
+  },
+  "search_keywords": {
+    "猫情報": [
+      "猫の習性",
+      "猫 豆知識",
+      "猫あるある",
+      "猫 行動 理由"
+    ],
+    "ごはん・魚": [
+      "刺身 おいしい",
+      "焼き魚 最高",
+      "ツナ缶",
+      "猫 おやつ"
+    ],
+    "睡眠の極意": [
+      "昼寝 最高",
+      "二度寝 幸せ",
+      "こたつ 出られない",
+      "寝る場所 大事"
+    ],
+    "暖かい場所": [
+      "こたつ 猫",
+      "ヒーター 前 動けない",
+      "日向ぼっこ",
+      "ストーブ 前 猫"
+    ],
+    "在宅ワーク観察": [
+      "在宅ワーク 猫",
+      "リモートワーク 猫 邪魔",
+      "テレワーク 膝 猫"
+    ],
+    "人間観察": [
+      "人間って不思議",
+      "なんで人間は",
+      "人間 よくわからない"
+    ],
+    "逆張り・猫の教え": [
+      "朝活 早起き",
+      "生産性 上げる",
+      "効率化 コツ",
+      "タスク管理 方法",
+      "人間関係 疲れた",
+      "頑張りすぎ 休めない",
+      "マルチタスク"
+    ]
+  }
+}

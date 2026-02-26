@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ホッケ運用ダッシュボード</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ホッケ運用ダッシュボード<small>最終読込: {{ fetched_at | default("--") }}</small></h1>
+
+    {# ===== Summary Cards ===== #}
+    <div class="summary-cards">
+      <div class="card">
+        <div class="card-label">今日の投稿目標</div>
+        <div class="card-value">{{ auto_post_state.target_today | default(0) }} 件</div>
+        <div class="card-sub">
+          {{ auto_post_state.date | default("--") }}
+          {% if auto_post_state.consecutive_skips | default(0) > 0 %}
+            / 連続スキップ {{ auto_post_state.consecutive_skips }}回
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">最終投稿</div>
+        <div class="card-value" style="font-size:1.1rem">{{ last_post_time | default("取得できません") }}</div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">ログエラー</div>
+        {% if log_errors %}
+          <div class="card-value status-error">{{ log_errors | length }} 件</div>
+        {% else %}
+          <div class="card-value status-ok">なし</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ===== Recent Posts ===== #}
+    <div class="section">
+      <div class="section-title">直近の投稿（{{ recent_posts | length }}件）</div>
+      {% if recent_posts %}
+      <table>
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>テキスト</th>
+            <th>カテゴリ</th>
+            <th class="text-right">imp</th>
+            <th class="text-right">likes</th>
+            <th class="text-center">判定</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in recent_posts | reverse %}
+          <tr>
+            {% set posted_at = p.postedAt or "" %}
+            <td style="white-space:nowrap;font-size:0.8rem">{{ posted_at[:10] or "--" }}<br>{{ posted_at[11:16] }}</td>
+            {% set text = p.text or "" %}
+            <td class="truncate" title="{{ text }}">{{ text[:50] or "--" }}{% if text | length > 50 %}...{% endif %}</td>
+            <td style="white-space:nowrap">{{ p.hookCategory | default("--") }}</td>
+            {% set imp = p.impressions %}
+            <td class="text-right">{% if imp is not none %}{{ imp }}{% else %}--{% endif %}</td>
+            {% set lk = p.likes %}
+            <td class="text-right">{% if lk is not none %}{{ lk }}{% else %}--{% endif %}</td>
+            <td class="text-center">
+              {% set diag = p.diagnosis %}
+              {% if diag == "GOOD" %}
+                <span class="badge badge-good">GOOD</span>
+              {% elif diag == "BAD" %}
+                <span class="badge badge-bad">BAD</span>
+              {% elif diag == "DROP" %}
+                <span class="badge badge-drop">DROP</span>
+              {% else %}
+                <span class="badge badge-neutral">{{ diag or "--" }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="no-data">投稿データがありません</p>
+      {% endif %}
+    </div>
+
+    {# ===== Category Stats ===== #}
+    <div class="section">
+      <div class="section-title">カテゴリ別パフォーマンス</div>
+      {% if category_stats %}
+      <table>
+        <thead>
+          <tr>
+            <th>カテゴリ</th>
+            <th class="text-right">投稿数</th>
+            <th class="text-right">平均imp</th>
+            <th class="text-right">平均likes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in category_stats %}
+          <tr>
+            <td>{{ c.category }}</td>
+            <td class="text-right">{{ c.count }}</td>
+            <td class="text-right">{{ c.avg_imp }}</td>
+            <td class="text-right">{{ c.avg_likes }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="no-data">統計データがありません</p>
+      {% endif %}
+    </div>
+
+    {# ===== Strategies (two-column) ===== #}
+    <div class="two-col">
+      <div class="section">
+        <div class="section-title">投稿戦略</div>
+        <div class="tag-list">
+          {% for cat in strategy.preferred_categories | default([]) %}
+            <span class="tag tag-preferred">{{ cat }}</span>
+          {% endfor %}
+          {% for cat in strategy.avoid_categories | default([]) %}
+            <span class="tag tag-avoid">{{ cat }}</span>
+          {% endfor %}
+        </div>
+        <p class="guidance-text">{{ strategy.guidance | default("データなし") }}</p>
+        {% if strategy.updated_at %}
+          <p class="card-sub" style="margin-top:8px">更新: {{ strategy.updated_at }}</p>
+        {% endif %}
+      </div>
+
+      <div class="section">
+        <div class="section-title">リプライ戦略</div>
+        <div class="tag-list">
+          {% for cat in reply_strategy.preferred_categories | default([]) %}
+            <span class="tag tag-preferred">{{ cat }}</span>
+          {% endfor %}
+          {% for cat in reply_strategy.avoid_categories | default([]) %}
+            <span class="tag tag-avoid">{{ cat }}</span>
+          {% endfor %}
+        </div>
+        <p class="guidance-text">{{ reply_strategy.guidance | default("データなし") }}</p>
+        {% if reply_strategy.updated_at %}
+          <p class="card-sub" style="margin-top:8px">更新: {{ reply_strategy.updated_at }}</p>
+        {% endif %}
+      </div>
+    </div>
+
+    {# ===== Reply Summary ===== #}
+    <div class="section">
+      <div class="section-title">リプライ概要</div>
+      <div class="reply-stats">
+        <div>投稿済: <strong>{{ reply_summary.posted | default(0) }}</strong> / {{ reply_summary.total | default(0) }} 件</div>
+        <div>
+          投稿率:
+          <strong>{{ reply_summary.posted_rate | default(0) }}%</strong>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: {{ reply_summary.posted_rate | default(0) }}%"></div>
+          </div>
+        </div>
+      </div>
+      {% if reply_summary.recent %}
+      <table>
+        <thead>
+          <tr>
+            <th>日時</th>
+            <th>対象ユーザー</th>
+            <th>リプライ</th>
+            <th>カテゴリ</th>
+            <th class="text-center">ステータス</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in reply_summary.recent %}
+          <tr>
+            <td style="white-space:nowrap;font-size:0.8rem">{{ r.date | default("--") }}</td>
+            <td>@{{ r.target_user | default("--") }}</td>
+            {% set rtext = r.reply_text or "" %}
+            <td class="truncate" title="{{ rtext }}">{{ rtext[:50] or "--" }}{% if rtext | length > 50 %}...{% endif %}</td>
+            <td style="white-space:nowrap">{{ r.category | default("--") }}</td>
+            <td class="text-center">
+              {% if r.status == "posted" %}
+                <span class="badge badge-good">posted</span>
+              {% elif r.status == "llm_skip" %}
+                <span class="badge badge-neutral">skip</span>
+              {% else %}
+                <span class="badge badge-neutral">{{ r.status | default("--") }}</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <p class="no-data">リプライデータがありません</p>
+      {% endif %}
+    </div>
+
+    {# ===== Log Errors ===== #}
+    {% if log_errors %}
+    <div class="section">
+      <div class="section-title">ログエラー（直近{{ log_errors | length }}件）</div>
+      <ul class="error-list">
+        {% for e in log_errors %}
+          <li>{{ e }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+  </div>
+</body>
+</html>

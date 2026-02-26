@@ -135,6 +135,152 @@ def _notify_reply_exception(error: Exception, dry_run: bool) -> None:
         print(f"[notify] Discord送信失敗: {res.error}", file=sys.stderr)
 
 
+def _build_mention_notify_summary(output: str, rc: int, dry_run: bool) -> dict:
+    m = re.search(r"結果:\s*(\d+)件投稿,\s*(\d+)件スキップ", output)
+    posted = int(m.group(1)) if m else 0
+    skipped = int(m.group(2)) if m else 0
+    mode = "DRY-RUN" if dry_run else "PROD"
+
+    notes: list[str] = []
+    if "日次上限到達" in output:
+        notes.append("日次上限到達")
+    if "セッション上限到達" in output:
+        notes.append("セッション上限到達")
+    if "新着メンションなし" in output:
+        notes.append("新着メンションなし")
+    if "メンション検索エラー" in output:
+        notes.append("検索エラーあり")
+
+    if rc != 0:
+        status = "FAILED"
+    elif posted > 0:
+        status = "SUCCESS"
+    elif skipped > 0:
+        status = "SKIPPED"
+    else:
+        status = "DONE"
+
+    return {
+        "mode": mode,
+        "posted": posted,
+        "skipped": skipped,
+        "exit_code": rc,
+        "status": status,
+        "notes": notes,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
+def _notify_mention_result(output: str, rc: int, dry_run: bool) -> None:
+    webhook_env = os.getenv("DISCORD_WEBHOOK_REPLY", "").strip()
+    if not webhook_env:
+        return
+    try:
+        notifier = DiscordNotifier.from_env("DISCORD_WEBHOOK_REPLY")
+    except ValueError:
+        return
+
+    summary = _build_mention_notify_summary(output=output, rc=rc, dry_run=dry_run)
+    color_map = {
+        "SUCCESS": 0x2ECC71,
+        "SKIPPED": 0xF1C40F,
+        "DONE": 0x3498DB,
+        "FAILED": 0xE74C3C,
+    }
+    log_tail = "\n".join(output.splitlines()[-8:]).strip()
+    if len(log_tail) > 900:
+        log_tail = log_tail[-900:]
+    notes_text = " / ".join(summary["notes"]) if summary["notes"] else "-"
+
+    fields = [
+        {"name": "Status", "value": f"`{summary['status']}`", "inline": True},
+        {"name": "Mode", "value": f"`{summary['mode']}`", "inline": True},
+        {"name": "Exit Code", "value": f"`{summary['exit_code']}`", "inline": True},
+        {"name": "Posted", "value": f"`{summary['posted']}`", "inline": True},
+        {"name": "Skipped", "value": f"`{summary['skipped']}`", "inline": True},
+        {"name": "Time", "value": summary["timestamp"], "inline": True},
+        {"name": "Notes", "value": notes_text[:1024], "inline": False},
+    ]
+    if log_tail:
+        fields.append({"name": "Log Tail", "value": f"```{log_tail}```", "inline": False})
+
+    res = notifier.send_embed(
+        title="ホッケ メンションリプライ実行結果",
+        description="メンションリプライのサマリーです。",
+        color=color_map.get(summary["status"], 0x5865F2),
+        fields=fields,
+        username="Hokke Mention Bot",
+    )
+    if not res.ok:
+        print(f"[notify] Discord送信失敗: {res.error}", file=sys.stderr)
+
+
+def _notify_mention_exception(error: Exception, dry_run: bool) -> None:
+    webhook_env = os.getenv("DISCORD_WEBHOOK_REPLY", "").strip()
+    if not webhook_env:
+        return
+    try:
+        notifier = DiscordNotifier.from_env("DISCORD_WEBHOOK_REPLY")
+    except ValueError:
+        return
+    mode = "DRY-RUN" if dry_run else "PROD"
+    fields = [
+        {"name": "Status", "value": "`FAILED`", "inline": True},
+        {"name": "Mode", "value": f"`{mode}`", "inline": True},
+        {"name": "Time", "value": datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "inline": True},
+        {"name": "Error", "value": f"```{str(error)[:900]}```", "inline": False},
+    ]
+    res = notifier.send_embed(
+        title="ホッケ メンションリプライエラー",
+        description="実行中に例外が発生しました。",
+        color=0xE74C3C,
+        fields=fields,
+        username="Hokke Mention Bot",
+    )
+    if not res.ok:
+        print(f"[notify] Discord送信失敗: {res.error}", file=sys.stderr)
+
+
+def handle_quote(args: argparse.Namespace) -> int:
+    if args.quote_action == "status":
+        cmd = [sys.executable, str(ROOT / "reply_system" / "quote_engine.py"), "status"]
+        return run(cmd, ROOT / "reply_system")
+
+    # run
+    cmd = [sys.executable, str(ROOT / "reply_system" / "quote_engine.py"), "run"]
+    if args.dry_run:
+        cmd.append("--dry-run")
+
+    return run(cmd, ROOT / "reply_system")
+
+
+def handle_mention(args: argparse.Namespace) -> int:
+    if args.mention_action == "status":
+        cmd = [sys.executable, str(ROOT / "reply_system" / "mention_reply.py"), "status"]
+        return run(cmd, ROOT / "reply_system")
+
+    # run
+    cmd = [sys.executable, str(ROOT / "reply_system" / "mention_reply.py"), "run"]
+    if args.dry_run:
+        cmd.append("--dry-run")
+
+    if args.notify_discord:
+        try:
+            rc, out, err = run_capture(cmd, ROOT / "reply_system")
+        except Exception as e:
+            _notify_mention_exception(e, dry_run=args.dry_run)
+            print(f"[run] mention実行エラー: {e}", file=sys.stderr)
+            return 1
+        if out:
+            print(out, end="")
+        if err:
+            print(err, end="", file=sys.stderr)
+        _notify_mention_result(output=f"{out}\n{err}".strip(), rc=rc, dry_run=args.dry_run)
+        return rc
+
+    return run(cmd, ROOT / "reply_system")
+
+
 def handle_post(args: argparse.Namespace) -> int:
     cmd = [sys.executable, str(ROOT / "post_scheduler" / "x_poster.py")]
     if args.verify:
@@ -247,6 +393,27 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--category", default="不明")
 
     reply.set_defaults(func=handle_reply)
+
+    mention = sub.add_parser("mention", help="mention-reply operations")
+    msub = mention.add_subparsers(dest="mention_action", required=True)
+
+    mrun = msub.add_parser("run")
+    mrun.add_argument("--dry-run", action="store_true")
+    mrun.add_argument("--notify-discord", action="store_true")
+
+    msub.add_parser("status")
+
+    mention.set_defaults(func=handle_mention)
+
+    quote = sub.add_parser("quote", help="quote-tweet operations")
+    qsub = quote.add_subparsers(dest="quote_action", required=True)
+
+    qrun = qsub.add_parser("run")
+    qrun.add_argument("--dry-run", action="store_true")
+
+    qsub.add_parser("status")
+
+    quote.set_defaults(func=handle_quote)
     return parser
 
 

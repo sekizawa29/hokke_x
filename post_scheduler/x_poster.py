@@ -161,6 +161,21 @@ class XPoster:
             print(f"リプライエラー: {e}")
             return {'success': False, 'error': str(e)}
 
+    def post_quote(self, text: str, quote_tweet_id: str) -> dict:
+        try:
+            response = self.api_client.create_tweet(
+                text=text,
+                quote_tweet_id=quote_tweet_id,
+                context="x_poster.post_quote",
+            )
+            tweet_id = response.data['id']
+            url = f"https://x.com/i/web/status/{tweet_id}"
+            print(f"引用ツイート投稿成功: {url}")
+            return {'success': True, 'tweet_id': tweet_id, 'url': url}
+        except tweepy.TweepyException as e:
+            print(f"引用ツイートエラー: {e}")
+            return {'success': False, 'error': str(e)}
+
     def post_thread(self, tweets: List[Dict]) -> dict:
         if not tweets:
             return {'success': False, 'error': '投稿リストが空'}

@@ -436,6 +436,35 @@ def print_summary(data: dict) -> None:
             print(f"  {diag_str}")
 
 
+def build_quote_analysis_summary(data: dict) -> str:
+    """hook_performance.json から引用ツイートのみをカテゴリ別に集計"""
+    from collections import defaultdict, Counter
+    quotes = [p for p in data["posts"]
+              if p.get("engagementFetchedAt")
+              and p.get("tweet_type") == "quote"
+              and p.get("hookCategory") not in ("未分類",)]
+    if not quotes:
+        return "引用ツイートデータなし"
+
+    categories: dict = defaultdict(list)
+    for post in quotes:
+        categories[post.get("hookCategory", "未分類")].append(post)
+
+    lines = [f"分析対象: 引用ツイート {len(quotes)}件\n"]
+    for cat, posts in sorted(categories.items(),
+                              key=lambda x: -(sum(p.get("impressions") or 0 for p in x[1]) / len(x[1]))):
+        n = len(posts)
+        avg_imp = sum(p.get("impressions") or 0 for p in posts) / n
+        avg_likes = sum(p.get("likes") or 0 for p in posts) / n
+        diag = Counter(p.get("diagnosis", "DROP") for p in posts)
+        recent = sorted(posts, key=lambda p: p.get("postedAt", ""), reverse=True)[:3]
+        lines.append(f"【{cat}】{n}件 平均imp={avg_imp:.0f} 平均いいね={avg_likes:.1f}")
+        lines.append(f"  診断: {dict(diag)}")
+        for p in recent:
+            lines.append(f"  - imp={p.get('impressions')} likes={p.get('likes')} 「{p['text'][:40]}」")
+    return "\n".join(lines)
+
+
 STRATEGY_FILE = SCRIPT_DIR.parent / "post_scheduler" / "strategy.json"
 REPLY_LOG_FILE = SCRIPT_DIR.parent / "reply_system" / "reply_log.json"
 REPLY_STRATEGY_FILE = SCRIPT_DIR.parent / "reply_system" / "reply_strategy.json"
@@ -484,7 +513,7 @@ def migrate_replies(data: dict) -> int:
 def build_analysis_summary(data: dict) -> str:
     """hook_performance.json からテキスト形式の分析サマリーを生成する"""
     from collections import defaultdict
-    fetched = [p for p in data["posts"] if p.get("engagementFetchedAt") and p.get("tweet_type") != "reply" and p.get("hookCategory") != "リプライ"]
+    fetched = [p for p in data["posts"] if p.get("engagementFetchedAt") and p.get("tweet_type") not in ("reply", "quote") and p.get("hookCategory") != "リプライ"]
     if not fetched:
         return "データなし"
 
@@ -492,7 +521,7 @@ def build_analysis_summary(data: dict) -> str:
     for post in fetched:
         categories[post.get("hookCategory", "未分類")].append(post)
 
-    lines = [f"分析対象: 通常投稿 {len(fetched)}件（リプライ除く）\n"]
+    lines = [f"分析対象: 通常投稿 {len(fetched)}件（リプライ・引用除く）\n"]
     for cat, posts in sorted(categories.items(), key=lambda x: -(sum(p.get("impressions") or 0 for p in x[1]) / len(x[1]))):
         n = len(posts)
         avg_imp = sum(p.get("impressions") or 0 for p in posts) / n
@@ -675,7 +704,7 @@ def run_act(data: dict) -> None:
         ]
         # カテゴリ集計を追加
         from collections import defaultdict
-        posts = [p for p in data["posts"] if p.get("engagementFetchedAt") and p.get("tweet_type") != "reply" and p.get("hookCategory") not in ("リプライ", "未分類")]
+        posts = [p for p in data["posts"] if p.get("engagementFetchedAt") and p.get("tweet_type") not in ("reply", "quote") and p.get("hookCategory") not in ("リプライ", "未分類")]
         cats: dict = defaultdict(list)
         for p in posts:
             cats[p["hookCategory"]].append(p)
@@ -690,6 +719,17 @@ def run_act(data: dict) -> None:
             f"指針: {guidance}",
             f"根拠: {reason}",
         ]
+        # 引用ツイートセクション
+        quote_posts = [p for p in data["posts"] if p.get("engagementFetchedAt") and p.get("tweet_type") == "quote" and p.get("hookCategory") not in ("未分類",)]
+        if quote_posts:
+            quote_cats: dict = defaultdict(list)
+            for p in quote_posts:
+                quote_cats[p["hookCategory"]].append(p)
+            lines += ["", "**🔁 引用ツイート パフォーマンス**"]
+            for cat, ps in sorted(quote_cats.items(), key=lambda x: -(sum(p.get("impressions") or 0 for p in x[1]) / len(x[1]))):
+                avg_imp = sum(p.get("impressions") or 0 for p in ps) / len(ps)
+                avg_likes = sum(p.get("likes") or 0 for p in ps) / len(ps)
+                lines.append(f"- `{cat}`: 平均imp {avg_imp:.0f} / 平均いいね {avg_likes:.1f} ({len(ps)}件)")
         # リプライ戦略もあれば追加
         if REPLY_STRATEGY_FILE.exists():
             try:

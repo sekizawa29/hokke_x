@@ -1,0 +1,9 @@
+{
+  "delay_min_sec": 90,
+  "delay_max_sec": 180,
+  "page_load_wait_min": 4.0,
+  "page_load_wait_max": 6.0,
+  "max_per_session": 10,
+  "confirm_each": false,
+  "confidence": 0.8
+}

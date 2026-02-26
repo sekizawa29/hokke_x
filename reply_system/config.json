@@ -5,7 +5,7 @@
   "max_replies_per_account_per_day": 1,
   "search_tweets_per_query": 10,
   "search_queries_per_run": 3,
-  "enabled": true,
+  "enabled": false,
   "min_followers_to_target": 50,
   "max_followers_to_target": 50000,
   "max_consecutive_skips": 5,
