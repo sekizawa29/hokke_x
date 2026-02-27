@@ -467,6 +467,7 @@ def build_quote_analysis_summary(data: dict) -> str:
 
 STRATEGY_FILE = SCRIPT_DIR.parent / "post_scheduler" / "strategy.json"
 REPLY_LOG_FILE = SCRIPT_DIR.parent / "reply_system" / "reply_log.json"
+SESSION_LOG_FILE = SCRIPT_DIR.parent / "reply_system" / "browser_automation" / "session_log.json"
 REPLY_STRATEGY_FILE = SCRIPT_DIR.parent / "reply_system" / "reply_strategy.json"
 
 
@@ -484,6 +485,16 @@ def migrate_replies(data: dict) -> int:
     for entry in reply_log:
         if entry.get("status") == "posted" and entry.get("reply_text") and entry.get("category"):
             text_to_category[entry["reply_text"].strip()] = entry["category"]
+
+    # session_log.json からもマッピング構築
+    if SESSION_LOG_FILE.exists():
+        try:
+            session_log = json.loads(SESSION_LOG_FILE.read_text(encoding="utf-8"))
+            for entry in session_log:
+                if entry.get("status") == "success" and entry.get("reply_text") and entry.get("category"):
+                    text_to_category[entry["reply_text"].strip()] = entry["category"]
+        except (json.JSONDecodeError, OSError):
+            pass
 
     updated = 0
     for post in data["posts"]:

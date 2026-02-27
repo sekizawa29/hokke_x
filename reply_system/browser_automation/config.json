@@ -5,5 +5,6 @@
   "page_load_wait_max": 6.0,
   "max_per_session": 10,
   "confirm_each": false,
-  "confidence": 0.8
+  "confidence": 0.8,
+  "chrome_profile": "Profile 43"
 }

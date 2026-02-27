@@ -112,5 +112,555 @@
     "returncode": 0,
     "timestamp": "2026-02-25T23:16:56.301555",
     "status": "success"
+  },
+  {
+    "username": "yuri_summers",
+    "tweet_id": "2026285152490639589",
+    "reply_text": "ふくらぎのとこだけ3回読んだ。あとは関係ない。猫だから。",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:21:09.825032",
+    "status": "success"
+  },
+  {
+    "username": "saitamatossi",
+    "tweet_id": "2026280219708113284",
+    "reply_text": "鯛の刺身からの出汁茶漬けって完璧な流れじゃん。魚を二度楽しむの、猫として尊敬する",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:23:12.479105",
+    "status": "success"
+  },
+  {
+    "username": "tamura_hayato",
+    "tweet_id": "2026250205314887755",
+    "reply_text": "刺身にカワハギ。猫が選んでも同じメニューになる",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:24:32.836039",
+    "status": "success"
+  },
+  {
+    "username": "0741Elnn",
+    "tweet_id": "2026860586584400171",
+    "reply_text": "猫は一度にひとつしかやらない。寝るときは寝る。それで何も困ってない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-26T13:26:58.522157",
+    "status": "failed"
+  },
+  {
+    "username": "haitora997",
+    "tweet_id": "2026859579242598760",
+    "reply_text": "僕の脳内リソース9割昼寝だから圧縮しても昼寝しか出てこない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:30:11.065182",
+    "status": "success"
+  },
+  {
+    "username": "anko_motidq10",
+    "tweet_id": "2026859285381361953",
+    "reply_text": "猫もシングルタスクで生きてるけど特に困ってない。ゆるくやるのが正解",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:33:04.681619",
+    "status": "success"
+  },
+  {
+    "username": "demae",
+    "tweet_id": "2026859122772291680",
+    "reply_text": "猫なら寝てる局面",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T13:36:20.458254",
+    "status": "success"
+  },
+  {
+    "username": "murasaki774",
+    "tweet_id": "2026858244044632290",
+    "reply_text": "脳内バグって再起動で直るらしいよ。つまり寝ろ",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-26T14:33:32.021732",
+    "status": "failed"
+  },
+  {
+    "username": "skmt_3274",
+    "tweet_id": "2026857208714305872",
+    "reply_text": "腹の音が一番正直な現状報告じゃん",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:35:48.644268",
+    "status": "success"
+  },
+  {
+    "username": "yukitsune_vrc",
+    "tweet_id": "2026856024922354056",
+    "reply_text": "休みのために休めなくなってる。人間のバグだよそれ",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:37:45.098548",
+    "status": "success"
+  },
+  {
+    "username": "SakuSakuAkio",
+    "tweet_id": "2026855830172348687",
+    "reply_text": "猫は常にシングルタスク。寝るか食べるか外見るか。それで何も困ってない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:40:10.691264",
+    "status": "success"
+  },
+  {
+    "username": "AmiyT5Sc5f9YO3A",
+    "tweet_id": "2026855559484576063",
+    "reply_text": "夜の楽しみで乗り切るの、ごはんの時間まで寝て待つ僕と構造が同じ",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:42:18.697388",
+    "status": "success"
+  },
+  {
+    "username": "Vitoria59394689",
+    "tweet_id": "2026810597443252727",
+    "reply_text": "タスク管理って要は昼寝の順番決めるやつでしょ。僕は全部後回しにして問題なく生きてる",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:44:53.182765",
+    "status": "success"
+  },
+  {
+    "username": "inumodoki_",
+    "tweet_id": "2026650011040362957",
+    "reply_text": "猫のタスク管理、寝る・食べる・寝るの3つしかないけど破綻したことない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:47:12.288162",
+    "status": "success"
+  },
+  {
+    "username": "yuu_20n",
+    "tweet_id": "2026570021821092034",
+    "reply_text": "猫のタスク管理は「寝る・食べる・寝る」で完成してる。見直す余地がない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T14:49:32.261504",
+    "status": "success"
+  },
+  {
+    "username": "murasaki774",
+    "tweet_id": "2026858244044632290",
+    "reply_text": "脳内バグって再起動で直るらしいよ。つまり寝ろ",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T15:23:32.383848",
+    "status": "success"
+  },
+  {
+    "username": "Mayuko_Miura",
+    "tweet_id": "2026538551345889292",
+    "reply_text": "回復よかったね。食べられるって幸せなの、猫は毎食知ってる",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T15:51:35.800566",
+    "status": "success"
+  },
+  {
+    "username": "Uberwoltsap",
+    "tweet_id": "2026527231959511468",
+    "reply_text": "やること自動で増える仕組みを便利って呼ぶの、人間っぽい",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T15:54:36.202007",
+    "status": "success"
+  },
+  {
+    "username": "kuronuko123",
+    "tweet_id": "2026429179248398369",
+    "reply_text": "僕もタスク溜めない派。そもそもやらないから。方向性は違うかもしれない",
+    "category": "逆張り・猫の教え",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T15:56:38.451580",
+    "status": "success"
+  },
+  {
+    "username": "SamPlaysPiano",
+    "tweet_id": "2026862628388352483",
+    "reply_text": "人間がやっと昼寝の才能に目覚めたらしい。僕は毎日やってる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T15:59:00.803061",
+    "status": "success"
+  },
+  {
+    "username": "jrqy08c6",
+    "tweet_id": "2026861471435739216",
+    "reply_text": "青空の下の昼寝はわかる。会えた相手が誰かは知らんけど、昼寝の良さがわかるならたぶんいいやつ",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-26T16:02:15.441957",
+    "status": "success"
+  },
+  {
+    "username": "psvfcito",
+    "tweet_id": "2026860455449473489",
+    "reply_text": "昼寝の良さわかる人は信用できる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T08:52:52.267826",
+    "status": "failed"
+  },
+  {
+    "username": "8hsv06ae",
+    "tweet_id": "2026860197457834427",
+    "reply_text": "昼寝の良さに気づいたの遅くない？猫は生まれた時から知ってる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T08:54:32.298553",
+    "status": "failed"
+  },
+  {
+    "username": "BeaRydin58813",
+    "tweet_id": "2026860027383001187",
+    "reply_text": "青空の下の昼寝についてわざわざ語る必要ある？寝ればわかる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T08:56:10.936436",
+    "status": "failed"
+  },
+  {
+    "username": "bf3zpm3h",
+    "tweet_id": "2026859097816183257",
+    "reply_text": "青空の下の昼寝、わかってるじゃん。場所選びが全てなんだよね",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T08:58:00.480943",
+    "status": "failed"
+  },
+  {
+    "username": "fyirmroc",
+    "tweet_id": "2026857085099717053",
+    "reply_text": "青空の下の昼寝、わかってるじゃん。場所選びが全て",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:00:44.649468",
+    "status": "failed"
+  },
+  {
+    "username": "r0mhthb8",
+    "tweet_id": "2026855620918522092",
+    "reply_text": "昼寝についてだけは完全に同意する。場所は問わない派だけど",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:02:30.159238",
+    "status": "failed"
+  },
+  {
+    "username": "btliwrvt",
+    "tweet_id": "2026855560482849240",
+    "reply_text": "昼寝の良さに気づいた人間は信用できる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:04:30.895857",
+    "status": "failed"
+  },
+  {
+    "username": "2e9tc54g",
+    "tweet_id": "2026854322349420889",
+    "reply_text": "青空の下の昼寝はわかる。会話はまあ…起きてたらね",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:06:19.160431",
+    "status": "failed"
+  },
+  {
+    "username": "psvfcito",
+    "tweet_id": "2026860455449473489",
+    "reply_text": "昼寝の良さわかる人は信用できる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:10:12.311679",
+    "status": "failed"
+  },
+  {
+    "username": "8hsv06ae",
+    "tweet_id": "2026860197457834427",
+    "reply_text": "昼寝の良さに気づいたの遅くない？猫は生まれた時から知ってる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T09:12:05.094513",
+    "status": "failed"
+  },
+  {
+    "username": "psvfcito",
+    "tweet_id": "2026860455449473489",
+    "reply_text": "昼寝の良さわかる人は信用できる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T09:31:15.359713",
+    "status": "success"
+  },
+  {
+    "username": "8hsv06ae",
+    "tweet_id": "2026860197457834427",
+    "reply_text": "昼寝の良さに気づいたの遅くない？猫は生まれた時から知ってる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T09:33:35.867448",
+    "status": "success"
+  },
+  {
+    "username": "BeaRydin58813",
+    "tweet_id": "2026860027383001187",
+    "reply_text": "青空の下の昼寝についてわざわざ語る必要ある？寝ればわかる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T09:35:57.735688",
+    "status": "success"
+  },
+  {
+    "username": "bf3zpm3h",
+    "tweet_id": "2026859097816183257",
+    "reply_text": "青空の下の昼寝、わかってるじゃん。場所選びが全てなんだよね",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T09:37:48.014090",
+    "status": "success"
+  },
+  {
+    "username": "fyirmroc",
+    "tweet_id": "2026857085099717053",
+    "reply_text": "青空の下の昼寝、わかってるじゃん。場所選びが全て",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T09:40:47.731456",
+    "status": "success"
+  },
+  {
+    "username": "r0mhthb8",
+    "tweet_id": "2026855620918522092",
+    "reply_text": "昼寝についてだけは完全に同意する。場所は問わない派だけど",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": -1,
+    "timestamp": "2026-02-27T10:27:01.371002",
+    "status": "failed"
+  },
+  {
+    "username": "r0mhthb8",
+    "tweet_id": "2026855620918522092",
+    "reply_text": "昼寝についてだけは完全に同意する。場所は問わない派だけど",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-27T10:54:10.384213",
+    "status": "failed"
+  },
+  {
+    "username": "r0mhthb8",
+    "tweet_id": "2026855620918522092",
+    "reply_text": "昼寝についてだけは完全に同意する。場所は問わない派だけど",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T12:00:23.302040",
+    "status": "success"
+  },
+  {
+    "username": "btliwrvt",
+    "tweet_id": "2026855560482849240",
+    "reply_text": "昼寝の良さに気づいた人間は信用できる",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T13:00:25.181077",
+    "status": "success"
+  },
+  {
+    "username": "2e9tc54g",
+    "tweet_id": "2026854322349420889",
+    "reply_text": "青空の下の昼寝はわかる。会話はまあ…起きてたらね",
+    "category": "睡眠の極意",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T17:22:45.499946",
+    "status": "success"
+  },
+  {
+    "username": "kamegawastore",
+    "tweet_id": "2026827561393861098",
+    "reply_text": "大羽イワシ55円て。僕も買いに行きたいけど猫だから財布がない",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T17:25:59.168830",
+    "status": "success"
+  },
+  {
+    "username": "yuezi_129",
+    "tweet_id": "2026763945156251677",
+    "reply_text": "マグロが終わったと聞いて来たけど遅かった",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T17:29:05.687859",
+    "status": "success"
+  },
+  {
+    "username": "abe_ch62342000",
+    "tweet_id": "2026704383334035693",
+    "reply_text": "生のレバーとか猫よりワイルドな食生活してる",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T17:30:56.700266",
+    "status": "success"
+  },
+  {
+    "username": "orugarudou",
+    "tweet_id": "2026660413899944273",
+    "reply_text": "金目もマグロも僕の管轄なんだけど、人間だけで食べるのずるくない？",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T17:34:08.383206",
+    "status": "success"
+  },
+  {
+    "username": "rinka7380",
+    "tweet_id": "2026619321125048777",
+    "reply_text": "北海道の猫としては同意せざるを得ない",
+    "category": "ごはん・魚",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T19:00:24.667131",
+    "status": "success"
+  },
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2026847329928491390",
+    "reply_text": "いい椅子を選んだのは人間。猫はそれを正当に評価してるだけ",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T19:02:52.526966",
+    "status": "success"
+  },
+  {
+    "username": "CNMNSN",
+    "tweet_id": "2026829591994863744",
+    "reply_text": "見られながらうんこする側の気持ちも少しは考えてほしい",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T19:05:11.254737",
+    "status": "success"
+  },
+  {
+    "username": "CNMNSN",
+    "tweet_id": "2026828223431241869",
+    "reply_text": "見られる側の気持ちも考えてほしい",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-27T19:07:20.431177",
+    "status": "failed"
+  },
+  {
+    "username": "spring_harukaze",
+    "tweet_id": "2026484927261274498",
+    "reply_text": "いい椅子を選んだ時点でそれ猫のもの。常識",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T19:09:39.915611",
+    "status": "success"
+  },
+  {
+    "username": "CNMNSN",
+    "tweet_id": "2026828223431241869",
+    "reply_text": "見られる側の気持ちも考えてほしい",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-27T21:14:56.606481",
+    "status": "failed"
+  },
+  {
+    "username": "neko_eiji",
+    "tweet_id": "2026069887479918811",
+    "reply_text": "猫は関係なく朝8時はまったりしてる。人間が勝手に合わせてきただけ",
+    "category": "在宅ワーク観察",
+    "dry_run": false,
+    "returncode": 2,
+    "timestamp": "2026-02-27T21:16:52.612664",
+    "status": "failed"
+  },
+  {
+    "username": "serene__ff14",
+    "tweet_id": "2026860927229002050",
+    "reply_text": "人間が「あるある」って言うやつ、猫からしたら普通の日常なんだけどね",
+    "category": "猫情報",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T21:19:15.259503",
+    "status": "success"
+  },
+  {
+    "username": "sinsinchounan01",
+    "tweet_id": "2026838780079124816",
+    "reply_text": "捨て猫じゃなくて、選んでる猫。人間が用意したものより自分で見つけた段ボールのほうがいいに決まってる",
+    "category": "猫情報",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T21:21:49.546756",
+    "status": "success"
+  },
+  {
+    "username": "tomomisu3216",
+    "tweet_id": "2026816184755302611",
+    "reply_text": "代わりのやつじゃないんだよね。あの上着がいいの。人間にはわからないだろうけど",
+    "category": "猫情報",
+    "dry_run": false,
+    "returncode": 0,
+    "timestamp": "2026-02-27T21:24:58.784622",
+    "status": "success"
   }
 ]

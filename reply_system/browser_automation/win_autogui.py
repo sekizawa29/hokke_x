@@ -123,13 +123,18 @@ def activate_chrome():
         print(f"  Chrome アクティブ化失敗（続行）: {e}")
 
 
-def open_tweet_page(url: str, wait_min: float = 4.0, wait_max: float = 6.0) -> bool:
+def open_tweet_page(url: str, wait_min: float = 4.0, wait_max: float = 6.0,
+                    chrome_profile: str | None = None) -> bool:
     """Chromeを前面に出し、新タブでツイートページを開く（マウス不使用）。"""
     chrome_path = find_chrome()
     if chrome_path:
         try:
+            cmd = [chrome_path]
+            if chrome_profile:
+                cmd.append(f"--profile-directory={chrome_profile}")
+            cmd.append(url)
             subprocess.Popen(
-                [chrome_path, url],
+                cmd,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
             )
@@ -297,6 +302,7 @@ def main():
                         help="画像認識の一致度 (0.0-1.0, default: 0.8)")
     parser.add_argument("--page-load-min", type=float, default=4.0)
     parser.add_argument("--page-load-max", type=float, default=6.0)
+    parser.add_argument("--chrome-profile", default=None, help="Chromeプロファイルディレクトリ名")
     args = parser.parse_args()
 
     if args.capture:
@@ -321,7 +327,7 @@ def main():
     print(f"  Text: {args.text[:60]}...")
 
     # Step 1: ページを開く
-    if not open_tweet_page(args.url, wait_min, wait_max):
+    if not open_tweet_page(args.url, wait_min, wait_max, chrome_profile=args.chrome_profile):
         sys.exit(1)
 
     # Step 2: リプライ欄にフォーカス（画像認識）

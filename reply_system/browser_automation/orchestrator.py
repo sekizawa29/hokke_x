@@ -95,7 +95,7 @@ def run_autogui(url: str, text: str, dry_run: bool, config: dict) -> dict:
         return {"returncode": -1, "stdout": "", "stderr": str(e)}
 
     cmd = [
-        "python.exe",
+        "/mnt/c/Users/sekiz/AppData/Local/Programs/Python/Python310/python.exe",
         win_script_path,
         "--url", url,
         "--text", text,
@@ -103,6 +103,9 @@ def run_autogui(url: str, text: str, dry_run: bool, config: dict) -> dict:
         "--page-load-max", str(config.get("page_load_wait_max", 6.0)),
         "--confidence", str(config.get("confidence", 0.8)),
     ]
+    chrome_profile = config.get("chrome_profile")
+    if chrome_profile:
+        cmd.extend(["--chrome-profile", chrome_profile])
     if dry_run:
         cmd.append("--dry-run")
 
@@ -261,6 +264,7 @@ def main():
         tweet_id = candidate.get("tweet_id", "")
         reply_text = candidate.get("reply_text", "")
         tweet_text = candidate.get("tweet_text", "")
+        category = candidate.get("category", "")
         url = f"https://x.com/{username}/status/{tweet_id}"
 
         print(f"--- [{i+1}/{len(targets)}] @{username} ---")
@@ -293,6 +297,7 @@ def main():
             "username": username,
             "tweet_id": tweet_id,
             "reply_text": reply_text,
+            "category": category,
             "dry_run": args.dry_run,
             "returncode": result["returncode"],
             "timestamp": datetime.now().isoformat(),

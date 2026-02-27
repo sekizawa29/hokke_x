@@ -488,7 +488,7 @@ def generate_image(image_category: str, image_hint: str | None) -> str | None:
     try:
         result = subprocess.run(
             [
-                "uv", "run", str(GENERATE_IMAGE_SCRIPT),
+                "/home/sekiz/.local/bin/uv", "run", str(GENERATE_IMAGE_SCRIPT),
                 "--prompt", prompt_json,
                 "--filename", filename,
                 "--resolution", "2K",
